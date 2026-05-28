@@ -8,6 +8,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    
     <style>
         body {
             font-family: 'Poppins', sans-serif;
@@ -26,37 +29,40 @@
                     <h2 id="user-display-name" class="text-lg font-bold text-slate-800">Memuat...</h2>
                     <p id="user-email" class="text-[11px] text-slate-400"></p>
                 </div>
-                <button id="btn-logout" class="text-red-400 hover:text-red-600 p-2 text-xs font-bold transition">
-                    Keluar
+                <button id="btn-logout" class="text-red-400 hover:text-red-600 p-2 text-sm font-bold transition flex items-center gap-1">
+                    <i class="fa-solid fa-right-from-bracket"></i> Keluar
                 </button>
             </div>
 
-            <div class="bg-gradient-to-r from-pink-300 to-rose-300 rounded-[24px] p-5 text-slate-800 shadow-sm">
-                <p class="text-[10px] font-bold tracking-wider uppercase opacity-70">Total Saldo Saat Ini</p>
-                <h3 id="balance-display" class="text-2xl font-bold mt-1">Rp 0</h3>
+            <div class="bg-gradient-to-r from-pink-300 to-rose-300 rounded-[24px] p-5 text-slate-800 shadow-sm relative overflow-hidden">
+                <div class="relative z-10">
+                    <p class="text-[10px] font-bold tracking-wider uppercase opacity-70">Total Saldo Saat Ini</p>
+                    <h3 id="balance-display" class="text-2xl font-bold mt-1">Rp 0</h3>
+                </div>
+                <i class="fa-solid fa-wallet text-6xl absolute right-4 bottom-2 opacity-15 text-slate-900"></i>
             </div>
 
             <div class="space-y-4 bg-slate-50/60 p-4 rounded-[24px] border border-pink-50">
                 <h4 class="text-xs font-bold text-slate-600 text-center uppercase tracking-wider">Tambah Catatan</h4>
                 
-                <div>
+                <div class="relative">
                     <input type="number" id="transaction-amount" placeholder="Jumlah (Rp). Contoh: 50000"
                         class="w-full px-4 py-3 rounded-full border border-slate-200 text-sm text-center focus:outline-none focus:border-pink-300 bg-white">
                 </div>
 
                 <div class="grid grid-cols-2 gap-2">
-                    <label class="border border-slate-100 rounded-full p-2.5 flex items-center justify-center gap-2 cursor-pointer transition bg-white text-xs font-medium text-slate-600">
+                    <label class="border border-slate-100 rounded-full p-2.5 flex items-center justify-center gap-1.5 cursor-pointer transition bg-white text-xs font-medium text-slate-600">
                         <input type="radio" name="transaction-type" value="income" checked class="text-pink-400 focus:ring-0">
-                        Pemasukan
+                        <i class="fa-solid fa-arrow-down text-emerald-500"></i> Pemasukan
                     </label>
-                    <label class="border border-slate-100 rounded-full p-2.5 flex items-center justify-center gap-2 cursor-pointer transition bg-white text-xs font-medium text-slate-600">
+                    <label class="border border-slate-100 rounded-full p-2.5 flex items-center justify-center gap-1.5 cursor-pointer transition bg-white text-xs font-medium text-slate-600">
                         <input type="radio" name="transaction-type" value="expense" class="text-pink-400 focus:ring-0">
-                        Pengeluaran
+                        <i class="fa-solid fa-arrow-up text-rose-500"></i> Pengeluaran
                     </label>
                 </div>
 
-                <button id="btn-save-transaction" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-medium py-3 rounded-full text-sm tracking-wide transition">
-                    Simpan Transaksi
+                <button id="btn-save-transaction" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-medium py-3 rounded-full text-sm tracking-wide transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-floppy-disk"></i> Simpan Transaksi
                 </button>
             </div>
         </div>
