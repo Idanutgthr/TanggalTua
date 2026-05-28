@@ -2,6 +2,8 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
 import { getAuth, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
 
+import { getFirestore } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+
 // GANTI DENGAN KONFIGURASI FIREBASE PROJECT ANDA SENDIRI
 const firebaseConfig = {
   apiKey: "AIzaSyBeooj-bdmmH46dbwAQKLaHUiS5-brURpM",
@@ -19,3 +21,5 @@ const app = initializeApp(firebaseConfig);
 // Ekspor instance Auth dan Google Provider untuk dipakai di app.js
 export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
+
+export const db = getFirestore(app);
