@@ -1,146 +1,176 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TanggalTua - Manajemen Keuangan</title>
+    <!-- Tailwind CSS untuk Styling -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Poppins (agar font terlihat modern dan bulat mirip gambar) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
     <style>
         body {
-            background: linear-gradient(135deg, #e0f2fe 0%, #3b82f6 100%);
+            font-family: 'Poppins', sans-serif;
+            /* Background gradasi kuning-pink lembut seperti pinggiran gambar */
+            background: linear-gradient(135deg, #fef08a 0%, #fbcfe8 100%);
         }
     </style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-4">
 
-    <div class="bg-white rounded-3xl shadow-2xl flex flex-col md:flex-row max-w-4xl w-full overflow-hidden min-h-[550px]">
+    <!-- CONTAINER UTAMA (Bentuk Card Melengkung Sesuai Gambar) -->
+    <div class="bg-white rounded-[40px] shadow-xl p-8 max-w-sm w-full min-h-[780px] flex flex-col items-center justify-between border border-pink-100">
         
-        <div id="auth-illustration" class="md:w-1/2 bg-sky-50 p-8 flex flex-col justify-center items-center relative hidden md:flex">
-            <div class="absolute inset-0 bg-gradient-to-tr from-sky-200/40 to-transparent rounded-r-[100px]"></div>
+        <!-- ========================================== -->
+        <!-- 1. LOGIN SCREEN (SESUAI IMAGE_C9FC03.PNG)  -->
+        <!-- ========================================== -->
+        <div id="login-screen" class="w-full flex flex-col items-center flex-grow justify-center space-y-6">
             
-            <div class="relative z-10 flex flex-col items-center text-center">
-                <div class="w-64 h-64 bg-sky-100 rounded-full flex items-center justify-center mb-6 shadow-inner relative">
-                    <i class="fa-solid fa-mobile-screen-button text-[120px] text-sky-400 absolute"></i>
-                    <i class="fa-solid fa-key text-5xl text-amber-400 absolute bottom-12 right-6 drop-shadow-md animate-bounce"></i>
-                    <i class="fa-solid fa-user-shield text-4xl text-sky-600 absolute top-10 left-6"></i>
-                </div>
-                <h3 class="text-xl font-bold text-sky-800">Simpan Uangmu di TanggalTua</h3>
-                <p class="text-sm text-sky-500 mt-2 max-w-xs">Catat pengeluaran dan pemasukan dengan aman dalam satu tempat.</p>
-            </div>
-        </div>
-
-        <div class="md:w-1/2 w-full p-8 flex flex-col justify-center min-h-[500px]">
-            
-            <div id="login-screen" class="space-y-6">
-                <div class="text-center md:text-left">
-                    <h2 class="text-3xl font-extrabold text-slate-800 tracking-wide">Welcome!</h2>
-                    <p class="text-sky-500 font-medium mt-1" id="auth-subtitle">Sign in to your Account</p>
-                </div>
-
-                <form id="auth-form" class="space-y-4">
-                    <div class="relative">
-                        <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400">
-                            <i class="fa-regular fa-envelope"></i>
-                        </span>
-                        <input type="email" id="email" required
-                            class="w-full pl-11 pr-4 py-3 border border-slate-200 rounded-full text-sm focus:outline-none focus:border-sky-400 transition" 
-                            placeholder="Email Address">
-                    </div>
-                    <div class="relative">
-                        <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400">
-                            <i class="fa-solid fa-lock"></i>
-                        </span>
-                        <input type="password" id="password" required
-                            class="w-full pl-11 pr-4 py-3 border border-slate-200 rounded-full text-sm focus:outline-none focus:border-sky-400 transition" 
-                            placeholder="Password">
-                    </div>
-
-                    <div class="text-right">
-                        <a href="#" class="text-xs font-semibold text-sky-500 hover:underline">Forgot Password?</a>
-                    </div>
-
-                    <div class="flex gap-4 pt-2">
-                        <button type="submit" id="btn-primary"
-                            class="flex-1 bg-sky-600 hover:bg-sky-700 text-white font-bold py-3 px-6 rounded-full text-sm tracking-wider shadow-md transition">
-                            SIGN IN
-                        </button>
-                        <button type="button" id="btn-secondary" onclick="toggleAuthMode()"
-                            class="flex-1 border border-sky-600 text-sky-600 hover:bg-sky-50 font-bold py-3 px-6 rounded-full text-sm tracking-wider transition">
-                            SIGN UP
-                        </button>
-                    </div>
-                </form>
-
-                <div class="relative flex py-2 items-center">
-                    <div class="flex-grow border-t border-slate-100"></div>
-                    <span class="flex-shrink mx-4 text-slate-400 text-xs tracking-widest font-medium">OR LOGIN WITH</span>
-                    <div class="flex-grow border-t border-slate-100"></div>
-                </div>
-
-                <div class="flex justify-center gap-6">
-                    <button class="w-12 h-12 rounded-full border border-slate-100 flex items-center justify-center shadow-sm hover:bg-slate-50 transition">
-                        <i class="fa-brands fa-facebook-f text-blue-600 text-lg"></i>
-                    </button>
-                    <button id="btn-google" class="w-12 h-12 rounded-full border border-slate-100 flex items-center justify-center shadow-sm hover:bg-slate-50 transition">
-                        <i class="fa-brands fa-google text-red-500 text-lg"></i>
-                    </button>
-                    <button class="w-12 h-12 rounded-full border border-slate-100 flex items-center justify-center shadow-sm hover:bg-slate-50 transition">
-                        <i class="fa-brands fa-linkedin-in text-sky-700 text-lg"></i>
-                    </button>
-                </div>
+            <!-- Ilustrasi Avatar Bulat -->
+            <div class="w-44 h-44 rounded-full bg-[#fbcfe8] bg-opacity-60 flex items-center justify-center overflow-hidden relative mb-2">
+                <!-- Anda bisa mengganti SVG ini dengan tag <img src="url_gambar_anda"> jika punya file gambarnya -->
+                <svg class="w-36 h-36 text-slate-700 mt-6" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                </svg>
             </div>
 
-            <div id="main-screen" class="space-y-6 hidden w-full">
-                <div class="flex justify-between items-center border-b pb-4">
-                    <div>
-                        <p class="text-xs text-slate-400 font-bold tracking-wider uppercase">Nama Pengguna</p>
-                        <h2 id="user-display-name" class="text-xl font-bold text-slate-800">Memuat...</h2>
-                        <p id="user-email" class="text-xs text-slate-500"></p>
-                    </div>
-                    <button id="btn-logout" class="text-red-500 hover:text-red-700 p-2 text-sm font-semibold transition">
-                        <i class="fa-solid fa-right-from-bracket mr-1"></i> Logout
+            <!-- Judul & Subtitle -->
+            <div class="text-center space-y-2">
+                <h2 class="text-2xl font-semibold text-slate-800 leading-tight">
+                    Selamat Datang di<br><span class="font-bold">Tanggal Tua</span>
+                </h2>
+                <p class="text-xs text-slate-500 font-medium max-w-[250px] mx-auto leading-relaxed">
+                    kelola keuangan dengan mudah dan lebih hemat
+                </p>
+            </div>
+
+            <!-- Form Kontainer -->
+            <form id="auth-form" class="w-full space-y-4 pt-2">
+                <!-- Input Email -->
+                <div>
+                    <input type="email" id="email" required
+                        class="w-full px-6 py-3 bg-[#fbcfe8] bg-opacity-60 text-slate-700 placeholder-slate-600 text-center rounded-full text-sm font-medium focus:outline-none focus:ring-2 focus:ring-pink-300 transition" 
+                        placeholder="Email">
+                </div>
+                
+                <!-- Input Kata Sandi -->
+                <div>
+                    <input type="password" id="password" required
+                        class="w-full px-6 py-3 bg-[#fbcfe8] bg-opacity-60 text-slate-700 placeholder-slate-600 text-center rounded-full text-sm font-medium focus:outline-none focus:ring-2 focus:ring-pink-300 transition" 
+                        placeholder="kata Sandi">
+                </div>
+
+                <!-- Tombol Masuk / Daftar Utama -->
+                <div class="pt-4">
+                    <button type="submit" id="btn-primary"
+                        class="w-full py-4 bg-[#fbcfe8] hover:bg-[#f9a8d4] text-slate-800 font-semibold rounded-full text-base tracking-wide shadow-sm transition duration-300">
+                        Masuk
                     </button>
                 </div>
+            </form>
 
-                <div class="bg-gradient-to-r from-sky-500 to-blue-600 rounded-2xl p-6 text-white shadow-lg">
-                    <p class="text-xs opacity-80 font-medium tracking-wider uppercase">Current Balance</p>
-                    <h3 id="balance-display" class="text-3xl font-black mt-1">Rp 0</h3>
-                </div>
+            <!-- Teks Pindah Mode (Daftar / Login) -->
+            <div class="text-center text-xs font-medium text-slate-700 pt-2">
+                <span id="text-toggle-info">Belum punya akun?</span> 
+                <button type="button" id="btn-secondary" onclick="toggleAuthMode()" class="text-pink-400 font-bold hover:underline ml-1">
+                    Daftar di sini
+                </button>
+            </div>
 
-                <div class="space-y-4 bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                    <h4 class="text-sm font-bold text-slate-700">Tambah Transaksi Baru</h4>
-                    
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-500 mb-1">Jumlah (Rp)</label>
-                        <input type="number" id="transaction-amount" placeholder="Contoh: 50000"
-                            class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-sky-400">
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-500 mb-1">Jenis Transaksi</label>
-                        <div class="grid grid-cols-2 gap-3">
-                            <label class="border rounded-xl p-3 flex items-center justify-center gap-2 cursor-pointer transition hover:bg-white bg-slate-100" id="label-income">
-                                <input type="radio" name="transaction-type" value="income" checked class="text-sky-600 focus:ring-0">
-                                <span class="text-sm font-medium text-slate-700">Penghasilan</span>
-                            </label>
-                            <label class="border rounded-xl p-3 flex items-center justify-center gap-2 cursor-pointer transition hover:bg-white bg-slate-100" id="label-expense">
-                                <input type="radio" name="transaction-type" value="expense" class="text-sky-600 focus:ring-0">
-                                <span class="text-sm font-medium text-slate-700">Pengeluaran</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <button id="btn-save-transaction"
-                        class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 rounded-xl text-sm tracking-wider transition">
-                        SIMPAN TRANSAKSI
-                    </button>
-                </div>
+            <!-- Tombol Google Sign-In -->
+            <div class="pt-4 w-full flex justify-center">
+                <button id="btn-google" class="w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-md hover:scale-105 transition transform duration-200 border border-slate-100">
+                    <!-- Icon Google Berwarna -->
+                    <svg class="w-6 h-6" viewBox="0 0 24 24">
+                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                    </svg>
+                </button>
             </div>
 
         </div>
+
+        <!-- ========================================== -->
+        <!-- 2. MAIN SCREEN (MUNCUL SETELAH LOGIN)     -->
+        <!-- ========================================== -->
+        <div id="main-screen" class="w-full space-y-6 hidden flex-col justify-between flex-grow">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-4">
+                <div>
+                    <p class="text-[10px] text-slate-400 font-bold tracking-wider uppercase">Nama Pengguna</p>
+                    <h2 id="user-display-name" class="text-lg font-bold text-slate-800">Memuat...</h2>
+                    <p id="user-email" class="text-[11px] text-slate-400"></p>
+                </div>
+                <button id="btn-logout" class="text-red-400 hover:text-red-600 p-2 text-xs font-bold transition">
+                    Keluar
+                </button>
+            </div>
+
+            <!-- Kartu Sisa Saldo (Balance) -->
+            <div class="bg-gradient-to-r from-pink-300 to-rose-300 rounded-[24px] p-5 text-slate-800 shadow-sm">
+                <p class="text-[10px] font-bold tracking-wider uppercase opacity-70">Total Saldo Saat Ini</p>
+                <h3 id="balance-display" class="text-2xl font-bold mt-1">Rp 0</h3>
+            </div>
+
+            <!-- Form Transaksi Baru -->
+            <div class="space-y-4 bg-slate-50/60 p-4 rounded-[24px] border border-pink-50">
+                <h4 class="text-xs font-bold text-slate-600 text-center uppercase tracking-wider">Tambah Catatan</h4>
+                
+                <div>
+                    <input type="number" id="transaction-amount" placeholder="Jumlah (Rp). Contoh: 50000"
+                        class="w-full px-4 py-3 rounded-full border border-slate-200 text-sm text-center focus:outline-none focus:border-pink-300 bg-white">
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                    <label class="border border-slate-100 rounded-full p-2.5 flex items-center justify-center gap-2 cursor-pointer transition bg-white text-xs font-medium text-slate-600" id="label-income">
+                        <input type="radio" name="transaction-type" value="income" checked class="text-pink-400 focus:ring-0">
+                        Pemasukan
+                    </label>
+                    <label class="border border-slate-100 rounded-full p-2.5 flex items-center justify-center gap-2 cursor-pointer transition bg-white text-xs font-medium text-slate-600" id="label-expense">
+                        <input type="radio" name="transaction-type" value="expense" class="text-pink-400 focus:ring-0">
+                        Pengeluaran
+                    </label>
+                </div>
+
+                <button id="btn-save-transaction"
+                    class="w-full bg-slate-800 hover:bg-slate-900 text-white font-medium py-3 rounded-full text-sm tracking-wide transition">
+                    Simpan Transaksi
+                </button>
+            </div>
+        </div>
+
     </div>
 
+    <!-- Menghubungkan Logika JavaScript Lama Anda -->
     <script type="module" src="app.js"></script>
+    
+    <!-- Logika Tambahan Khusus untuk Mengubah Teks Saat Tombol Daftar Klik -->
+    <script>
+        function toggleAuthMode() {
+            // Memanggil fungsi asli di app.js terlebih dahulu jika ada
+            if(window.toggleAuthModeJS) { window.toggleAuthModeJS(); }
+            
+            const subtitle = document.querySelector('#login-screen h2');
+            const infoText = document.getElementById('text-toggle-info');
+            const btnPrimary = document.getElementById('btn-primary');
+            const btnSecondary = document.getElementById('btn-secondary');
+            
+            if (btnPrimary.innerText === "Masuk") {
+                subtitle.innerHTML = "Daftar Akun<br><span class='font-bold'>Tanggal Tua</span>";
+                btnPrimary.innerText = "Daftar";
+                infoText.innerText = "Sudah punya akun?";
+                btnSecondary.innerText = "Masuk di sini";
+            } else {
+                subtitle.innerHTML = "Selamat Datang di<br><span class='font-bold'>Tanggal Tua</span>";
+                btnPrimary.innerText = "Masuk";
+                infoText.innerText = "Belum punya akun?";
+                btnSecondary.innerText = "Daftar di sini";
+            }
+        }
+    </script>
 </body>
 </html>

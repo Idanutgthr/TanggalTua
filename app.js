@@ -42,7 +42,7 @@ let currentBalance = 0;
 // AUTHENTICATION LOGIC (LOGIN / REGISTER)
 // ==========================================
 
-window.toggleAuthMode = function() {
+window.toggleAuthModeJS = function() {
     isSignUpMode = !isSignUpMode;
     if (isSignUpMode) {
         authSubtitle.innerText = "Create your new Account";
