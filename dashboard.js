@@ -1,7 +1,7 @@
 // dashboard.js
 import { auth, db } from "./firebase-config.js";
 import { signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
-import { doc, getDoc, setDoc, collection, addDoc, query, where, getDocs, orderBy, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+import { doc, getDoc, setDoc, collection, addDoc, query, where, getDocs, orderBy, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
 
 // ==========================================
 // KUMPULAN ELEMEN DOM UTAMA
@@ -52,7 +52,7 @@ const iconUserDefault = document.getElementById('icon-user-default');
 // ==========================================
 // GLOBAL STATE MANAJEMEN
 // ==========================================
-let currentDate = new Date(); // Otomatis Deteksi Tanggal Sekarang (29 Mei 2026)
+let currentDate = new Date(); 
 let reportDate = new Date();  
 let currentBalance = 0;
 let currentSavings = 0; 
@@ -60,7 +60,6 @@ let selectedType = 'expense';
 let selectedKategori = '';
 let editingTransactionId = null; 
 
-// State Khusus Disiplin Mode
 let disiplinActive = false;
 let nominalAwalVal = 0;
 let tipeMenabungLevel = 'kustom';
@@ -87,7 +86,7 @@ const kategoriData = {
 };
 
 // ==========================================
-// 1. SISTEM NAVIGASI (MENU UTAMA BOTTOM BAR)
+// 1. SISTEM NAVIGASI CORE UTAMA
 // ==========================================
 function pindahMenuUtama(targetMenu) {
     Object.keys(containers).forEach(menu => {
@@ -130,7 +129,7 @@ document.getElementById('btn-next-date').addEventListener('click', () => { curre
 function updateTanggalLayar() { currentDateDisplay.innerText = formatTanggalString(currentDate); if(auth.currentUser) loadHistoriHariIni(auth.currentUser.uid); }
 
 // ==========================================
-// 2. SISTEM RESET BULANAN & SINKRONISASI DATA
+// 2. SISTEM AUTOMATIC RESET BULANAN & SYNC
 // ==========================================
 onAuthStateChanged(auth, async (user) => {
     if (user) {
@@ -220,7 +219,7 @@ function renderKategori() {
 }
 
 // =====================================================================
-// 4. KODE FITUR LAMA: RENDERING HISTORI DENGAN GESER (SWIPE GESTURE)
+// 4. RENDERING HISTORI DENGAN FITUR GESER (SWIPE GESTURE DETECTOR)
 // =====================================================================
 async function loadHistoriHariIni(uid) {
     historiList.innerHTML = '';
@@ -246,9 +245,9 @@ async function loadHistoriHariIni(uid) {
             itemWrapper.className = "relative overflow-hidden rounded-2xl min-h-[66px] w-full border border-pink-50 shadow-sm";
             itemWrapper.innerHTML = `
                 <div class="absolute inset-0 bg-pink-100 flex items-center justify-around px-4 z-0">
-                    <button class="btn-swipe-hapus bg-[#f87171] text-white font-bold px-4 py-1.5 rounded-full text-xs shadow-sm active:scale-95 transition">Hapus</button>
-                    <button class="btn-swipe-edit bg-[#fbbf24] text-slate-800 font-bold px-5 py-1.5 rounded-full text-xs shadow-sm active:scale-95 transition">Edit</button>
-                    <button class="btn-swipe-batal bg-[#4ade80] text-white font-bold px-4 py-1.5 rounded-full text-xs shadow-sm active:scale-95 transition">Batal</button>
+                    <button class="btn-swipe-hapus bg-[#f87171] text-white font-bold px-4 py-1.5 rounded-full text-xs shadow-sm">Hapus</button>
+                    <button class="btn-swipe-edit bg-[#fbbf24] text-slate-800 font-bold px-5 py-1.5 rounded-full text-xs shadow-sm">Edit</button>
+                    <button class="btn-swipe-batal bg-[#4ade80] text-white font-bold px-4 py-1.5 rounded-full text-xs shadow-sm">Batal</button>
                 </div>
                 <div class="layer-konten flex justify-between items-center bg-white px-4 py-3 relative z-10 w-full h-full transition-transform duration-300 transform translate-x-0 cursor-grab select-none">
                     <div class="flex items-center gap-3 pointer-events-none">
@@ -266,14 +265,12 @@ async function loadHistoriHariIni(uid) {
             layerKonten.addEventListener('touchmove', (e) => { if (!isSwiping) return; currentX = e.touches[0].clientX; let diff = currentX - startX; if (diff < 0 && diff > -260) layerKonten.style.transform = `translateX(${diff}px)`; });
             layerKonten.addEventListener('touchend', () => { isSwiping = false; layerKonten.classList.add('transition-transform'); if (currentX - startX < -60) layerKonten.style.transform = 'translateX(-100%)'; else layerKonten.style.transform = 'translateX(0)'; });
             
-            // Mouse Listener bagi Desktop
             layerKonten.addEventListener('mousedown', (e) => { startX = e.clientX; isSwiping = true; layerKonten.classList.remove('transition-transform'); });
             window.addEventListener('mousemove', (e) => { if (!isSwiping) return; currentX = e.clientX; let diff = currentX - startX; if (diff < 0 && diff > -260) layerKonten.style.transform = `translateX(${diff}px)`; });
             window.addEventListener('mouseup', () => { if (!isSwiping) return; isSwiping = false; layerKonten.classList.add('transition-transform'); if (currentX - startX < -60) layerKonten.style.transform = 'translateX(-100%)'; else layerKonten.style.transform = 'translateX(0)'; });
 
             itemWrapper.querySelector('.btn-swipe-batal').addEventListener('click', () => layerKonten.style.transform = 'translateX(0)');
             
-            // PROSES ACTION DELETE LAMA
             itemWrapper.querySelector('.btn-swipe-hapus').addEventListener('click', async () => {
                 if (confirm(`Hapus catatan ${data.kategori}?`)) {
                     if (data.type === 'income') currentBalance -= data.amount;
@@ -285,7 +282,6 @@ async function loadHistoriHariIni(uid) {
                 }
             });
 
-            // PROSES ACTION EDIT LAMA
             itemWrapper.querySelector('.btn-swipe-edit').addEventListener('click', () => {
                 editingTransactionId = id;
                 transactionAmount.value = data.amount;
@@ -303,7 +299,7 @@ async function loadHistoriHariIni(uid) {
 }
 
 // ==========================================
-// 5. SUBMIT TRANSAKSI BARU / UPDATE EDIT LAMA
+// 5. SUBMIT TRANSAKSI BARU / UPDATE DATA EDIT
 // ==========================================
 btnSubmitTransaksi.addEventListener('click', async () => {
     const amount = parseInt(transactionAmount.value);
@@ -331,11 +327,10 @@ btnSubmitTransaksi.addEventListener('click', async () => {
             if (selectedType === 'expense') {
                 if (amount > currentBalance) { alert("Saldo tidak mencukupi."); return; }
                 
-                // INTERSEPTOR NOTIFIKASI MODE DISIPLIN
                 if (disiplinActive) {
                     const rule = aturanBatasKategori.find(r => r.kategori === selectedKategori);
                     if (rule && amount > rule.limit) {
-                        const lanjut = confirm(`[PERINGATAN DISIPLIN]\n\nPengeluaran Kategori "${selectedKategori}" senilai Rp ${amount.toLocaleString('id-ID')} melampaui batas maksimal rule aturan Anda (Batas: Rp ${rule.limit.toLocaleString('id-ID')}).\n\nTetap ingin melanjutkan transaksi ini?`);
+                        const lanjut = confirm(`[PERINGATAN DISIPLIN]\n\nPengeluaran Kategori "${selectedKategori}" melampaui batas maksimal rule aturan Anda (Batas: Rp ${rule.limit.toLocaleString('id-ID')}).\n\nTetap ingin melanjutkan transaksi ini?`);
                         if (!lanjut) return;
                     }
                 }
@@ -358,7 +353,7 @@ btnSubmitTransaksi.addEventListener('click', async () => {
 });
 
 // ==========================================
-// 6. LOGIKA DAN ATURAN LAYAR MODE DISIPLIN
+// 6. LOGIKA PENYUSUN KONTEN MODE DISIPLIN
 // ==========================================
 toggleModeDisiplin.addEventListener('change', async (e) => {
     disiplinActive = e.target.checked;
@@ -460,7 +455,7 @@ btnSimpanDisiplinConfig.addEventListener('click', async () => {
 });
 
 // ==========================================
-// 7. EDIT FOTO PROFILE & BAHASA/TEMA LOCAL
+// 7. PROFILE & UPDATE DATA AVATAR
 // ==========================================
 inputFileAvatar.addEventListener('change', (e) => {
     const file = e.target.files[0];
@@ -482,7 +477,7 @@ document.getElementById('btn-edit-name').addEventListener('click', async () => {
 });
 
 // ==========================================
-// 8. MENU REPORT LAPORAN (CHART.JS)
+// 8. DATA REPORT LAPORAN (CHART.JS LOGIC UTANPA POTONGAN)
 // ==========================================
 const repBtnPrevMonth = document.getElementById('rep-btn-prev-month');
 const repBtnNextMonth = document.getElementById('rep-btn-next-month');
@@ -546,8 +541,97 @@ async function updateHalamanLaporan() {
     } catch (err) { console.error(err); }
 }
 
-function renderDonutChart(dataObj, totalUang) { repDataList.innerHTML = ''; const labelData = Object.keys(dataObj); const valueData = Object.values(dataObj); if (labelData.length === 0) { repDataList.innerHTML = '<p class="text-center text-xs text-slate-400 mt-6">Tidak ada data.</p>'; const ctx = document.getElementById('financialChart').getContext('2d'); activeChartInstance = new Chart(ctx, { type: 'doughnut', data: { labels: ['Kosong'], datasets: [{ data: [1], backgroundColor: ['#e2e8f0'] }] }, options: { plugins: { legend: { display: false } } } }); return; } const warnaWarni = ['#60a5fa', '#c084fc', '#34d399', '#4ade80', '#f87171', '#fbbf24', '#d97706', '#2dd4bf']; const ctx = document.getElementById('financialChart').getContext('2d'); activeChartInstance = new Chart(ctx, { type: 'doughnut', data: { labels: labelData, datasets: [{ data: valueData, backgroundColor: warnaWarni.slice(0, labelData.length), borderWidth: 2 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, cutout: '60%' } }); labelData.forEach((label, index) => { const nominal = valueData[index]; const persentase = totalUang > 0 ? Math.round((nominal / totalUang) * 100) : 0; const row = document.createElement('div'); row.className = "flex justify-between items-center bg-white border border-pink-50 rounded-2xl px-4 py-2.5 shadow-sm text-xs"; row.innerHTML = `<div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full" style="background-color: ${warnaWarni[index]}"></div><span class="font-bold text-slate-700">${label}</span></div><div class="flex gap-4 text-slate-600"><span class="font-medium">${persentase}%</span><span class="font-bold text-slate-800">Rp ${nominal.toLocaleString('id-ID')}</span></div>`; repDataList.appendChild(row); }); }
-function renderLineChart(harianObj) { repDataList.innerHTML = ''; const arrayTanggalKeys = Object.keys(harianObj); const arrayNilaiValues = Object.values(harianObj); const labelHariSaja = arrayTanggalKeys.map(k => parseInt(k.split('-')[2])); const ctx = document.getElementById('financialChart').getContext('2d'); activeChartInstance = new Chart(ctx, { type: 'line', data: { labels: labelHariSaja, datasets: [{ data: arrayNilaiValues, borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.1)', borderWidth: 2, tension: 0.3, pointRadius: 1, fill: true }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } }, y: { grid: { color: '#f3f4f6' } } } } }); const headerRow = document.createElement('div'); headerRow.className = "flex justify-between px-3 text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1"; headerRow.innerHTML = `<span>Tanggal</span><span>Total Pengeluaran</span>`; repDataList.appendChild(headerRow); let adaTransaksi = false; arrayTanggalKeys.forEach((tglFull, index) => { const pengeluaranHariIni = arrayNilaiValues[index]; if (pengeluaranHariIni > 0) { adaTransaksi = true; const formatTglIndo = new Date(tglFull).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }); const row = document.createElement('div'); row.className = "flex justify-between items-center bg-white border border-pink-50 rounded-xl px-4 py-2 shadow-sm text-xs"; row.innerHTML = `<span>${formatTglIndo}</span><span class="font-bold text-slate-800">Rp ${pengeluaranHariIni.toLocaleString('id-ID')}</span>`; repDataList.appendChild(row); } }); if (!adaTransaksi) { repDataList.innerHTML += '<p class="text-center text-xs text-slate-400 mt-6">Tidak ada catatan pengeluaran bulan ini.</p>'; } }
+// =====================================================================
+// FUNGSI UTUH UNTUK MENGGAMBAR GRAFIK DONUT & LINE CHART (CHART.JS)
+// =====================================================================
+function renderDonutChart(dataObj, totalUang) {
+    repDataList.innerHTML = '';
+    const labelData = Object.keys(dataObj);
+    const valueData = Object.values(dataObj);
+
+    if (labelData.length === 0) {
+        repDataList.innerHTML = '<p class="text-center text-xs text-slate-400 mt-6">Tidak ada data transaksi.</p>';
+        const ctx = document.getElementById('financialChart').getContext('2d');
+        activeChartInstance = new Chart(ctx, {
+            type: 'doughnut',
+            data: { labels: ['Kosong'], datasets: [{ data: [1], backgroundColor: ['#e2e8f0'] }] },
+            options: { plugins: { legend: { display: false } } }
+        });
+        return;
+    }
+
+    const warnaWarni = ['#60a5fa', '#c084fc', '#34d399', '#4ade80', '#f87171', '#fbbf24', '#d97706', '#2dd4bf'];
+    const ctx = document.getElementById('financialChart').getContext('2d');
+    activeChartInstance = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: labelData,
+            datasets: [{ data: valueData, backgroundColor: warnaWarni.slice(0, labelData.length), borderWidth: 2 }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, cutout: '60%' }
+    });
+
+    labelData.forEach((label, index) => {
+        const nominal = valueData[index];
+        const persentase = totalUang > 0 ? Math.round((nominal / totalUang) * 100) : 0;
+        const row = document.createElement('div');
+        row.className = "flex justify-between items-center bg-white border border-pink-50 rounded-2xl px-4 py-2.5 shadow-sm text-xs";
+        row.innerHTML = `<div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full" style="background-color: ${warnaWarni[index]}"></div><span class="font-bold text-slate-700">${label}</span></div><div class="flex gap-4 text-slate-600"><span class="font-medium">${persentase}%</span><span class="font-bold text-slate-800">Rp ${nominal.toLocaleString('id-ID')}</span></div>`;
+        repDataList.appendChild(row);
+    });
+}
+
+function renderLineChart(harianObj) {
+    repDataList.innerHTML = '';
+    const arrayTanggalKeys = Object.keys(harianObj);
+    const arrayNilaiValues = Object.values(harianObj);
+    const labelHariSaja = arrayTanggalKeys.map(k => parseInt(k.split('-')[2]));
+
+    const ctx = document.getElementById('financialChart').getContext('2d');
+    activeChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labelHariSaja,
+            datasets: [{
+                data: arrayNilaiValues,
+                borderColor: '#3b82f6',
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                borderWidth: 2,
+                tension: 0.3,
+                pointRadius: 1,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: { x: { grid: { display: false } }, y: { grid: { color: '#f3f4f6' } } }
+        }
+    });
+
+    const headerRow = document.createElement('div');
+    headerRow.className = "flex justify-between px-3 text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1";
+    headerRow.innerHTML = `<span>Tanggal</span><span>Total Pengeluaran</span>`;
+    repDataList.appendChild(headerRow);
+
+    let adaTransaksi = false;
+    arrayTanggalKeys.forEach((tglFull, index) => {
+        const pengeluaranHariIni = arrayNilaiValues[index];
+        if (pengeluaranHariIni > 0) {
+            adaTransaksi = true;
+            const formatTglIndo = new Date(tglFull).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+            const row = document.createElement('div');
+            row.className = "flex justify-between items-center bg-white border border-pink-50 rounded-xl px-4 py-2 shadow-sm text-xs";
+            row.innerHTML = `<span>${formatTglIndo}</span><span class="font-bold text-slate-800">Rp ${pengeluaranHariIni.toLocaleString('id-ID')}</span>`;
+            repDataList.appendChild(row);
+        }
+    });
+
+    if (!adaTransaksi) {
+        repDataList.innerHTML += '<p class="text-center text-xs text-slate-400 mt-6">Tidak ada catatan pengeluaran bulan ini.</p>';
+    }
+}
 
 // Log-out
 document.getElementById('btn-logout').addEventListener('click', () => { signOut(auth).catch(err => alert(err.message)); });
