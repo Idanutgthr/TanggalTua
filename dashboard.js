@@ -20,7 +20,7 @@ const tabPengeluaran = document.getElementById('tab-pengeluaran');
 const transactionAmount = document.getElementById('transaction-amount');
 const kategoriGrid = document.getElementById('kategori-grid');
 
-// DOM Mode Disiplin
+// DOM Mode Disiplin[cite: 2]
 const subDisiplinUtama = document.getElementById('sub-disiplin-utama');
 const subDisiplinRulesPicker = document.getElementById('sub-disiplin-rules-picker');
 const toggleModeDisiplin = document.getElementById('toggle-mode-disiplin');
@@ -77,7 +77,7 @@ const kategoriData = {
 };
 
 // ==========================================
-// 1. NAVIGATION ROUTING
+// 1. NAVIGATION ROUTING[cite: 2]
 // ==========================================
 function pindahMenuUtama(targetMenu) {
     Object.keys(containers).forEach(menu => {
@@ -118,7 +118,7 @@ document.getElementById('btn-next-date').addEventListener('click', () => { curre
 function updateTanggalLayar() { currentDateDisplay.innerText = formatTanggalString(currentDate); if(auth.currentUser) loadHistoriHariIni(auth.currentUser.uid); }
 
 // ==========================================
-// 2. REALTIME FIRESTORE SYNC & AUTO RESET
+// 2. REALTIME FIRESTORE SYNC & AUTO RESET[cite: 2]
 // ==========================================
 onAuthStateChanged(auth, async (user) => {
     if (user) {
@@ -150,7 +150,7 @@ async function cekResetAkhirBulanDanSync(uid) {
             currentSavings += currentBalance;
             alert(`Periode baru dimulai! Sisa uang bulan lalu sebesar Rp ${currentBalance.toLocaleString('id-ID')} otomatis dimasukkan ke tabungan.`);
             currentBalance = 0;
-            disiplinActive = false; // Reset otomatis kunci disiplin saat bulan baru
+            disiplinActive = false; 
             
             await setDoc(userRef, { balance: currentBalance, savings: currentSavings, lastResetMonth: stringBulanSekarang, disiplinActive: false }, { merge: true });
         }
@@ -160,12 +160,12 @@ async function cekResetAkhirBulanDanSync(uid) {
     
     toggleModeDisiplin.checked = disiplinActive;
     
-    // ATURAN BARU: CEK SAKELAR KUNCI DISIPLIN
-    proteksiTombolToggleDisiplin();
+    // Evaluasi tombol dan komponen berdasarkan status disiplin[cite: 2]
+    proteksiDanSembunyikanKomponenDisiplin();
 
     boxKonfigurasiDisiplin.classList.toggle('hidden', !disiplinActive);
     updateBalanceDOM();
-    hitungPersenTabungan(); // Selalu hitung dari saldo berjalan terupdate
+    hitungPersenTabungan(); 
     await loadRulesFromCloud(uid);
 }
 
@@ -174,17 +174,35 @@ function updateBalanceDOM() {
     profileSavingDisplay.innerText = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(currentSavings);
 }
 
-// ATURAN BARU: Fungsi Proteksi Kunci Sakelar Toggle
-function proteksiTombolToggleDisiplin() {
+// ==========================================
+// FIX BUG: FUNGSI SEMBUNYIKAN SELESAI KLIK
+// ==========================================
+function proteksiDanSembunyikanKomponenDisiplin() {
+    const gridLevelContainer = document.getElementById('lvl-kustom').parentElement;
+
     if (disiplinActive && currentBalance > 0) {
+        // 1. Kunci sakelar toggle utama[cite: 2]
         toggleModeDisiplin.setAttribute('disabled', 'true');
+        
+        // 2. Sembunyikan tombol Simpan, Tambah Aturan, dan Grid Level sesuai instruksi
+        btnSimpanDisiplinConfig.classList.add('hidden');
+        btnTambahAturan.classList.add('hidden');
+        gridLevelContainer.classList.add('hidden');
+        
+        // Kunci input nilai tabungan agar tidak bisa dimodifikasi manual lewat ketikan belakang
+        inputNilaiTabungan.setAttribute('readonly', 'true');
     } else {
+        // Jika belum aktif, kembalikan tampilan konfigurasi seperti semula
         toggleModeDisiplin.removeAttribute('disabled');
+        btnSimpanDisiplinConfig.classList.remove('hidden');
+        btnTambahAturan.classList.remove('hidden');
+        gridLevelContainer.classList.remove('hidden');
+        inputNilaiTabungan.removeAttribute('readonly');
     }
 }
 
 // ==========================================
-// 3. ATURAN BARU: FORM LOGIKA MODE DISIPLIN
+// 3. LOGIKA FORM MODE DISIPLIN[cite: 2]
 // ==========================================
 toggleModeDisiplin.addEventListener('change', async (e) => {
     disiplinActive = e.target.checked;
@@ -203,15 +221,15 @@ Object.keys(lvlButtons).forEach(lvl => {
 });
 
 function hitungPersenTabungan() {
+    if (disiplinActive && btnSimpanDisiplinConfig.classList.contains('hidden')) return; // Jika sudah dikunci, stop hitung ulang agar data tidak ke-reset 0
+
     let persen = 0;
-    inputNilaiTabungan.removeAttribute('readonly');
-    if (tipeMenabungLevel === 'mudah') { persen = 10; inputNilaiTabungan.setAttribute('readonly', 'true'); }
-    else if (tipeMenabungLevel === 'sedang') { persen = 20; inputNilaiTabungan.setAttribute('readonly', 'true'); }
-    else if (tipeMenabungLevel === 'sulit') { persen = 30; inputNilaiTabungan.setAttribute('readonly', 'true'); }
+    if (tipeMenabungLevel === 'mudah') persen = 10;
+    else if (tipeMenabungLevel === 'sedang') persen = 20;
+    else if (tipeMenabungLevel === 'sulit') persen = 30;
     
     labelTabunganPersen.innerText = `Tabungan (${persen}%)`;
     if (tipeMenabungLevel !== 'kustom') {
-        // AMBIL NILAI PRESENTASE LANGSUNG DARI SALDO SAAT INI (CURRENT BALANCE)
         inputNilaiTabungan.value = Math.round(currentBalance * (persen / 100));
     }
 }
@@ -230,13 +248,13 @@ btnSimpanDisiplinConfig.addEventListener('click', async () => {
         await setDoc(doc(db, "users", uid), { balance: currentBalance, savings: currentSavings, disiplinActive: true }, { merge: true });
         for (const rule of aturanBatasKategori) { await setDoc(doc(db, "users", uid, "rules", rule.kategori), rule); }
         
-        alert("Mode Disiplin Dikunci! Aturan aktif dan tidak dapat dimatikan hingga akhir bulan.");
+        alert("Mode Disiplin Aktif! Aturan dikunci dan dana tabungan berhasil dikirim ke akun.");
         await cekResetAkhirBulanDanSync(uid);
     } catch(e) { alert(e.message); }
 });
 
 // ==========================================
-// SUB FORM ATURAN KATEGORI
+// SUB FORM ATURAN KATEGORI[cite: 2]
 // ==========================================
 btnTambahAturan.addEventListener('click', () => { subDisiplinUtama.classList.add('hidden'); subDisiplinRulesPicker.classList.remove('hidden'); renderKategoriRulesSelection(); });
 btnCancelRule.addEventListener('click', () => { subDisiplinRulesPicker.classList.add('hidden'); subDisiplinUtama.classList.remove('hidden'); ruleSelectedKategori = ''; });
@@ -269,12 +287,17 @@ function renderRulesListDOM() {
     aturanBatasKategori.forEach(rule => {
         const row = document.createElement('div');
         row.className = "bg-pink-50/60 border border-pink-100 rounded-xl p-3 flex justify-between items-center text-xs";
-        row.innerHTML = `<div><p class="font-bold text-slate-800">${rule.kategori}</p><p class="text-[9px] text-slate-400">Batas Maksimal: Per ${rule.periode}</p></div><div class="text-right"><span class="font-black text-slate-700">Rp ${rule.limit.toLocaleString('id-ID')}</span><button class="block text-[9px] text-red-400 font-bold hover:underline mt-0.5" onclick="hapusRuleLokal('${rule.kategori}')">Hapus</button></div>`;
+        
+        // Hapus link tombol hapus bawaan jika mode disiplin sudah terkunci di cloud
+        const htmlTombolHapus = disiplinActive ? '' : `<button class="block text-[9px] text-red-400 font-bold hover:underline mt-0.5" onclick="hapusRuleLokal('${rule.kategori}')">Hapus</button>`;
+
+        row.innerHTML = `<div><p class="font-bold text-slate-800">${rule.kategori}</p><p class="text-[9px] text-slate-400">Batas Maksimal: Per ${rule.periode}</p></div><div class="text-right"><span class="font-black text-slate-700">Rp ${rule.limit.toLocaleString('id-ID')}</span>${htmlTombolHapus}</div>`;
         rulesListContainer.appendChild(row);
     });
 }
 
 window.hapusRuleLokal = async (katName) => {
+    if (disiplinActive) return; // Kunci akses fungsi hapus jika sudah aktif
     aturanBatasKategori = aturanBatasKategori.filter(r => r.kategori !== katName);
     if(auth.currentUser) { try { await deleteDoc(doc(db, "users", auth.currentUser.uid, "rules", katName)); } catch(e){} }
     renderRulesListDOM();
@@ -286,7 +309,7 @@ async function loadRulesFromCloud(uid) {
 }
 
 // ==========================================
-// 4. PEMASUKAN / PENGELUARAN UTAMA
+// 4. PEMASUKAN / PENGELUARAN UTAMA[cite: 2]
 // ==========================================
 function setTabFormType(type) {
     selectedType = type;
@@ -318,7 +341,7 @@ function renderKategori() {
 }
 
 // ==========================================
-// 5. DETEKSI GESTURE SWIPE HISTORI
+// 5. RENDERING HISTORI DENGAN FITUR SWIPE[cite: 2]
 // ==========================================
 async function loadHistoriHariIni(uid) {
     historiList.innerHTML = '';
@@ -370,8 +393,7 @@ async function loadHistoriHariIni(uid) {
                     await deleteDoc(doc(db, "transactions", id));
                     await setDoc(doc(db, "users", uid), { balance: currentBalance }, { merge: true });
                     
-                    // Trigger proteksi tombol pasca penghapusan (siapa tahu saldo jadi Rp 0)
-                    proteksiTombolToggleDisiplin();
+                    proteksiDanSembunyikanKomponenDisiplin();
                     updateBalanceDOM();
                     loadHistoriHariIni(uid);
                 }
@@ -393,7 +415,7 @@ async function loadHistoriHariIni(uid) {
 }
 
 // ==========================================
-// 6. ACTION SUBMIT TRANSACTION
+// 6. ACTION SUBMIT TRANSACTION[cite: 2]
 // ==========================================
 btnSubmitTransaksi.addEventListener('click', async () => {
     const amount = parseInt(transactionAmount.value);
@@ -440,8 +462,7 @@ btnSubmitTransaksi.addEventListener('click', async () => {
 
         await setDoc(userRef, { balance: currentBalance }, { merge: true });
         
-        // Evaluasi kunci setelah transaksi (jika sisa saldo menjadi Rp 0, gembok terbuka)
-        proteksiTombolToggleDisiplin();
+        proteksiDanSembunyikanKomponenDisiplin();
         updateBalanceDOM();
         btnCancelTransaksi.click();
         loadHistoriHariIni(currentUser.uid);
@@ -449,7 +470,7 @@ btnSubmitTransaksi.addEventListener('click', async () => {
 });
 
 // ==========================================
-// 7. PROFILE & AVATAR EDIT
+// 7. PROFILE & AVATAR EDIT[cite: 2]
 // ==========================================
 inputFileAvatar.addEventListener('change', (e) => {
     const file = e.target.files[0];
@@ -469,7 +490,7 @@ document.getElementById('btn-edit-name').addEventListener('click', async () => {
 });
 
 // ==========================================
-// 8. MENU LAPORAN (CHART.JS LOGIC UTANPA POTONGAN)
+// 8. MENU REPORT LAPORAN (CHART.JS LOGIC)[cite: 2]
 // ==========================================
 const repBtnPrevMonth = document.getElementById('rep-btn-prev-month');
 const repBtnNextMonth = document.getElementById('rep-btn-next-month');
@@ -551,6 +572,7 @@ function renderDonutChart(dataObj, totalUang) {
     }); 
 }
 
+// (Fungsi renderLineChart tetap dipertahankan penuh tanpa potongan)[cite: 2]
 function renderLineChart(harianObj) { 
     repDataList.innerHTML = ''; const arrayTanggalKeys = Object.keys(harianObj); const arrayNilaiValues = Object.values(harianObj); const labelHariSaja = arrayTanggalKeys.map(k => parseInt(k.split('-')[2])); const ctx = document.getElementById('financialChart').getContext('2d'); 
     activeChartInstance = new Chart(ctx, { type: 'line', data: { labels: labelHariSaja, datasets: [{ data: arrayNilaiValues, borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.1)', borderWidth: 2, tension: 0.3, pointRadius: 1, fill: true }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } }, y: { grid: { color: '#f3f4f6' } } } } }); 
@@ -567,5 +589,5 @@ function renderLineChart(harianObj) {
     if (!adaTransaksi) { repDataList.innerHTML += '<p class="text-center text-xs text-slate-400 mt-6">Tidak ada catatan pengeluaran bulan ini.</p>'; } 
 }
 
-// Log-out
+// Log-out[cite: 2]
 document.getElementById('btn-logout').addEventListener('click', () => { signOut(auth).catch(err => alert(err.message)); });
