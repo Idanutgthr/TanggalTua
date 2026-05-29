@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TanggalTua - Dashboard Utama</title>
+    <title>TanggalTua - Dashboard</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
+        // Konfigurasi Tailwind untuk mendukung class dark mode
         tailwind.config = { darkMode: 'class' }
     </script>
     
@@ -14,7 +15,7 @@
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2 family=Poppins:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -26,9 +27,9 @@
         .custom-scroll::-webkit-scrollbar-thumb { background: #fbcfe8; border-radius: 10px; }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center sm:p-4 bg-gradient-to-br from-yellow-200 to-pink-200 dark:from-slate-900 dark:to-slate-800 transition-colors duration-300">
+<body class="min-h-screen flex items-center justify-center p-4 bg-gradient-to-135 from-yellow-200 to-pink-200 dark:from-slate-900 dark:to-slate-800 transition-colors duration-300">
 
-    <div class="bg-white dark:bg-slate-900 w-full h-screen sm:h-[780px] sm:max-w-sm p-6 flex flex-col justify-between border-0 sm:border border-pink-100 dark:border-slate-800 sm:rounded-[40px] sm:shadow-2xl relative overflow-hidden transition-colors duration-300">
+    <div class="bg-white dark:bg-slate-900 rounded-[40px] shadow-2xl p-6 max-w-sm w-full h-[780px] flex flex-col justify-between border border-pink-100 dark:border-slate-800 relative overflow-hidden transition-colors duration-300">
         
         <div class="flex-grow flex flex-col overflow-y-auto custom-scroll pb-4">
             
@@ -72,7 +73,7 @@
                         <span data-i18n="mode_disiplin" class="font-bold text-slate-800 dark:text-slate-200 text-sm">Mode Disiplin</span>
                         <label class="relative inline-flex items-center cursor-pointer">
                             <input type="checkbox" id="toggle-mode-disiplin" class="sr-only peer">
-                            <div class="w-11 h-6 bg-slate-200 dark:bg-slate-700 rounded-full peer peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
+                            <div class="w-11 h-6 bg-slate-200 dark:bg-slate-700 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
                         </label>
                     </div>
 
@@ -84,7 +85,7 @@
                             <button id="lvl-mudah" data-i18n="lvl_mudah" class="py-2 rounded-lg text-slate-600 dark:text-slate-400">Mudah</button>
                         </div>
 
-                        <div class="flex justify-between items-center bg-[#fbcfe8] bg-opacity-30 p-3 rounded-xl border border-pink-100 dark:border-slate-700">
+                        <div class="flex justify-between items-center bg-[#fbcfe8] bg-opacity-30 dark:bg-slate-800 p-3 rounded-xl border border-pink-100 dark:border-slate-700">
                             <span id="label-tabungan-persen" class="text-xs font-bold text-slate-700 dark:text-slate-300">Tabungan</span>
                             <input type="number" id="input-nilai-tabungan" class="w-1/2 bg-transparent text-right font-black text-xs text-slate-800 dark:text-white focus:outline-none" placeholder="Rp. 0">
                         </div>
@@ -123,7 +124,7 @@
                     <button id="rep-btn-next-month" class="text-pink-400"><i class="fa-solid fa-chevron-right"></i></button>
                 </div>
 
-                <div class="bg-[#fbcfe8] bg-opacity-40 rounded-2xl p-2.5 grid grid-cols-3 gap-1.5 text-center text-[10px] border border-pink-200/30 dark:border-slate-700 shadow-inner">
+                <div class="bg-[#fbcfe8] bg-opacity-40 dark:bg-slate-800 rounded-2xl p-2.5 grid grid-cols-3 gap-1.5 text-center text-[10px] border border-pink-200/30 dark:border-slate-700 shadow-inner">
                     <div class="bg-white dark:bg-slate-700 rounded-xl p-2 shadow-sm flex flex-col justify-center">
                         <p data-i18n="tab_income" class="text-slate-400 dark:text-slate-300 font-bold uppercase text-[9px]">Pemasukan</p>
                         <p id="rep-total-income" class="font-bold text-green-600 mt-0.5 truncate">Rp 0</p>
@@ -178,13 +179,8 @@
                     <h3 id="profile-saving-display" class="text-xl font-black text-slate-800 dark:text-white">Rp 0</h3>
                 </div>
 
-                <div class="w-full space-y-2">
-                    <div class="w-full">
-                        <button class="w-full bg-pink-50/60 dark:bg-slate-800 border border-pink-100 dark:border-slate-700 px-4 py-3 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-300 flex justify-between items-center shadow-sm">
-                            <span>Tabungan</span><i class="fa-solid fa-chevron-right text-pink-300 text-[10px]"></i>
-                        </button>
-                    </div>
-                    <div class="w-full">
+                <div class="w-full space-y-2 relative">
+                    <div class="w-full relative">
                         <button id="btn-dropdown-bahasa" class="w-full bg-pink-50/60 dark:bg-slate-800 border border-pink-100 dark:border-slate-700 px-4 py-3 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-300 flex justify-between items-center shadow-sm">
                             <span data-i18n="lang_label">Bahasa</span>
                             <span class="text-pink-400 dark:text-pink-500 font-normal text-[11px]" id="current-lang-text">Bahasa Indonesia <i class="fa-solid fa-check text-[10px]"></i></span>
@@ -194,7 +190,8 @@
                             <button id="opt-lang-en" class="w-full px-4 py-3 text-slate-700 dark:text-slate-300 hover:bg-pink-50 dark:hover:bg-slate-700 font-medium flex justify-between"><span>English</span><i class="fa-solid fa-check text-pink-500 en-check hidden"></i></button>
                         </div>
                     </div>
-                    <div class="w-full">
+
+                    <div class="w-full relative">
                         <button id="btn-dropdown-tema" class="w-full bg-pink-50/60 dark:bg-slate-800 border border-pink-100 dark:border-slate-700 px-4 py-3 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-300 flex justify-between items-center shadow-sm">
                             <span data-i18n="theme_label">Mode Layar</span>
                             <span class="text-pink-400 dark:text-pink-500 font-normal text-[11px]" id="current-theme-text">Terang <i class="fa-solid fa-check text-[10px]"></i></span>
@@ -215,7 +212,7 @@
 
         </div>
 
-        <div class="border-t border-pink-100/60 pt-3 mt-auto flex justify-around items-center bg-white/80 backdrop-blur-sm dark:bg-slate-900">
+        <div class="border-t border-pink-100/60 pt-3 mt-auto flex justify-around items-center bg-white/80 dark:bg-slate-900 backdrop-blur-sm">
             <button id="nav-transaksi" type="button" class="nav-item w-12 h-12 rounded-full bg-white dark:bg-slate-800 flex items-center justify-center shadow-md border border-pink-100 dark:border-slate-700 text-pink-500 text-base transition transform scale-110"><i class="fa-solid fa-pencil"></i></button>
             <button id="nav-notifikasi" type="button" class="nav-item w-10 h-10 text-slate-400 hover:text-pink-400 text-base transition"><i class="fa-solid fa-bell"></i></button>
             <button id="nav-laporan" type="button" class="nav-item w-10 h-10 text-slate-400 hover:text-pink-400 text-base transition"><i class="fa-solid fa-chart-simple"></i></button>
