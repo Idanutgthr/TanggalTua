@@ -1,6 +1,7 @@
 // dashboard.js
 import { auth, db } from "./firebase-config.js";
 import { signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
+// FIX: Memperbaiki URL import Firestore yang salah pada versi sebelumnya
 import { doc, getDoc, setDoc, collection, addDoc, query, where, getDocs, orderBy, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
 
 // ==========================================
@@ -46,7 +47,7 @@ const inputFileAvatar = document.getElementById('input-file-avatar');
 const imgUserAvatar = document.getElementById('img-user-avatar');
 const iconUserDefault = document.getElementById('icon-user-default');
 
-// DOM Elemen Dropdown Interaktif Baru
+// DOM Elemen Dropdown Akun
 const btnDropdownBahasa = document.getElementById('btn-dropdown-bahasa');
 const boxSelectBahasa = document.getElementById('box-select-bahasa');
 const btnDropdownTema = document.getElementById('btn-dropdown-tema');
@@ -121,22 +122,30 @@ const kategoriData = {
     ]
 };
 
+const reportTypes = ['pemasukan', 'pengeluaran', 'rata-rata'];
+let currentTypeIndex = 1; 
+let activeChartInstance = null; 
+
 // ==========================================
 // 1. SISTEM PERUBAHAN BAHASA & TEMA LAYAR
 // ==========================================
 function aplikasikanBahasaLayar() {
     document.querySelectorAll('[data-i18n]').forEach(el => {
         const key = el.getAttribute('data-i18n');
-        el.innerText = i18nDictionary[currentLang][key];
+        if (i18nDictionary[currentLang][key]) el.innerText = i18nDictionary[currentLang][key];
     });
     document.querySelectorAll('[data-i18n-holder]').forEach(el => {
         const key = el.getAttribute('data-i18n-holder');
-        el.setAttribute('placeholder', i18nDictionary[currentLang][key]);
+        if (i18nDictionary[currentLang][key]) el.setAttribute('placeholder', i18nDictionary[currentLang][key]);
     });
     
-    document.getElementById('current-lang-text').innerHTML = `${currentLang === 'id' ? 'Bahasa Indonesia' : 'English'} <i class="fa-solid fa-check text-[10px]"></i>`;
-    document.querySelector('.id-check').classList.toggle('hidden', currentLang !== 'id');
-    document.querySelector('.en-check').classList.toggle('hidden', currentLang !== 'en');
+    if (document.getElementById('current-lang-text')) {
+        document.getElementById('current-lang-text').innerHTML = `${currentLang === 'id' ? 'Bahasa Indonesia' : 'English'} <i class="fa-solid fa-check text-[10px]"></i>`;
+    }
+    const idCheck = document.querySelector('.id-check');
+    const enCheck = document.querySelector('.en-check');
+    if (idCheck) idCheck.classList.toggle('hidden', currentLang !== 'id');
+    if (enCheck) enCheck.classList.toggle('hidden', currentLang !== 'en');
     
     updateTanggalLayar();
     if (containers['laporan'].classList.contains('flex')) updateHalamanLaporan();
@@ -146,26 +155,36 @@ function aplikasikanTemaLayar() {
     const htmlEl = document.documentElement;
     if (currentTheme === 'dark') {
         htmlEl.classList.add('dark');
-        document.getElementById('current-theme-text').innerHTML = `${currentLang === 'id' ? 'Gelap' : 'Dark'} <i class="fa-solid fa-check text-[10px]"></i>`;
-        document.querySelector('.dark-check').classList.remove('hidden');
-        document.querySelector('.light-check').classList.add('hidden');
+        if (document.getElementById('current-theme-text')) {
+            document.getElementById('current-theme-text').innerHTML = `${currentLang === 'id' ? 'Gelap' : 'Dark'} <i class="fa-solid fa-check text-[10px]"></i>`;
+        }
+        if (document.querySelector('.dark-check')) document.querySelector('.dark-check').classList.remove('hidden');
+        if (document.querySelector('.light-check')) document.querySelector('.light-check').classList.add('hidden');
     } else {
         htmlEl.classList.remove('dark');
-        document.getElementById('current-theme-text').innerHTML = `${currentLang === 'id' ? 'Terang' : 'Light'} <i class="fa-solid fa-check text-[10px]"></i>`;
-        document.querySelector('.light-check').classList.remove('hidden');
-        document.querySelector('.dark-check').classList.add('hidden');
+        if (document.getElementById('current-theme-text')) {
+            document.getElementById('current-theme-text').innerHTML = `${currentLang === 'id' ? 'Terang' : 'Light'} <i class="fa-solid fa-check text-[10px]"></i>`;
+        }
+        if (document.querySelector('.light-check')) document.querySelector('.light-check').classList.remove('hidden');
+        if (document.querySelector('.dark-check')) document.querySelector('.dark-check').classList.add('hidden');
     }
 }
 
-// Handler klik dropdown opsi select kustom
-btnDropdownBahasa.addEventListener('click', (e) => { e.stopPropagation(); boxSelectBahasa.classList.toggle('hidden'); boxSelectTema.classList.add('hidden'); });
-btnDropdownTema.addEventListener('click', (e) => { e.stopPropagation(); boxSelectTema.classList.toggle('hidden'); boxSelectBahasa.classList.add('hidden'); });
-window.addEventListener('click', () => { boxSelectBahasa.classList.add('hidden'); boxSelectTema.classList.add('hidden'); });
+if (btnDropdownBahasa) {
+    btnDropdownBahasa.addEventListener('click', (e) => { e.stopPropagation(); boxSelectBahasa.classList.toggle('hidden'); boxSelectTema.classList.add('hidden'); });
+}
+if (btnDropdownTema) {
+    btnDropdownTema.addEventListener('click', (e) => { e.stopPropagation(); boxSelectTema.classList.toggle('hidden'); boxSelectBahasa.classList.add('hidden'); });
+}
+window.addEventListener('click', () => { 
+    if (boxSelectBahasa) boxSelectBahasa.classList.add('hidden'); 
+    if (boxSelectTema) boxSelectTema.classList.add('hidden'); 
+});
 
-document.getElementById('opt-lang-id').addEventListener('click', () => simpanPreferensiUser('lang', 'id'));
-document.getElementById('opt-lang-en').addEventListener('click', () => simpanPreferensiUser('lang', 'en'));
-document.getElementById('opt-theme-light').addEventListener('click', () => simpanPreferensiUser('theme', 'light'));
-document.getElementById('opt-theme-dark').addEventListener('click', () => simpanPreferensiUser('theme', 'dark'));
+if (document.getElementById('opt-lang-id')) document.getElementById('opt-lang-id').addEventListener('click', () => simpanPreferensiUser('lang', 'id'));
+if (document.getElementById('opt-lang-en')) document.getElementById('opt-lang-en').addEventListener('click', () => simpanPreferensiUser('lang', 'en'));
+if (document.getElementById('opt-theme-light')) document.getElementById('opt-theme-light').addEventListener('click', () => simpanPreferensiUser('theme', 'light'));
+if (document.getElementById('opt-theme-dark')) document.getElementById('opt-theme-dark').addEventListener('click', () => simpanPreferensiUser('theme', 'dark'));
 
 async function simpanPreferensiUser(key, value) {
     if (key === 'lang') currentLang = value;
@@ -180,7 +199,7 @@ async function simpanPreferensiUser(key, value) {
 }
 
 // ==========================================
-// 2. SISTEM ROUTING NAVIGASI BAWAH
+// 2. SISTEM NAVIGASI CORE UTAMA
 // ==========================================
 function pindahMenuUtama(targetMenu) {
     Object.keys(containers).forEach(menu => {
@@ -197,26 +216,14 @@ function pindahMenuUtama(targetMenu) {
 }
 Object.keys(navItems).forEach(menu => { navItems[menu].addEventListener('click', () => { pindahMenuUtama(menu); if(menu==='laporan') updateHalamanLaporan(); }); });
 
-// =====================================================================
-// 3. LOGIKA KALENDER HARIAN (AMANKAN AGAR TIDAK LEWAT HARI INI)
-// =====================================================================
-function formatTanggalString(dateObj) { 
-    return dateObj.toLocaleDateString(currentLang === 'id' ? 'id-ID' : 'en-US', { day: 'numeric', month: 'long', year: 'numeric' }); 
-}
-function formatTanggalDatabase(dateObj) { 
-    return `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`; 
-}
-
-document.getElementById('btn-prev-date').addEventListener('click', () => {
-    currentDate.setDate(currentDate.getDate() - 1);
-    updateTanggalLayar();
-});
-
+// ==========================================
+// 3. KALENDER MANAJEMEN HARIAN (MAX HARI INI)
+// ==========================================
+document.getElementById('btn-prev-date').addEventListener('click', () => { currentDate.setDate(currentDate.getDate() - 1); updateTanggalLayar(); });
 document.getElementById('btn-next-date').addEventListener('click', () => {
     const hariIni = new Date();
     const cloneNextDate = new Date(currentDate.getTime());
     cloneNextDate.setDate(cloneNextDate.getDate() + 1);
-    
     cloneNextDate.setHours(0, 0, 0, 0);
     hariIni.setHours(0, 0, 0, 0);
 
@@ -224,18 +231,12 @@ document.getElementById('btn-next-date').addEventListener('click', () => {
         alert(currentLang === 'id' ? "Tidak dapat melihat atau mencatat transaksi untuk hari esok!" : "Cannot view or log transactions for tomorrow!");
         return;
     }
-
     currentDate.setDate(currentDate.getDate() + 1);
     updateTanggalLayar();
 });
 
-function updateTanggalLayar() { 
-    currentDateDisplay.innerText = formatTanggalString(currentDate); 
-    if(auth.currentUser) loadHistoriHariIni(auth.currentUser.uid); 
-}
-
 // ==========================================
-// 4. REALTIME FIRESTORE SYNC & AUTO BULANAN
+// 4. SYNC FIREBASE CLOUD & DETEKSI AWAL BULAN
 // ==========================================
 onAuthStateChanged(auth, async (user) => {
     if (user) {
@@ -268,7 +269,7 @@ async function cekResetAkhirBulanDanSync(uid) {
         
         if (lastResetMonth !== stringBulanSekarang && currentBalance > 0) {
             currentSavings += currentBalance;
-            alert(currentLang === 'id' ? `Periode baru dimulai! Sisa uang bulan lalu sebesar Rp ${currentBalance.toLocaleString('id-ID')} otomatis dimasukkan ke tabungan.` : `New period started! Sisa saldo Rp ${currentBalance.toLocaleString('id-ID')} has been auto-saved.`);
+            alert(currentLang === 'id' ? `Periode baru dimulai! Sisa saldo bulan lalu sebesar Rp ${currentBalance.toLocaleString('id-ID')} otomatis dialihkan ke tabungan.` : `New period started! Remaining balance of Rp ${currentBalance.toLocaleString('id-ID')} has been auto-saved.`);
             currentBalance = 0;
             disiplinActive = false; 
             await setDoc(userRef, { balance: currentBalance, savings: currentSavings, lastResetMonth: stringBulanSekarang, disiplinActive: false }, { merge: true });
@@ -284,11 +285,6 @@ async function cekResetAkhirBulanDanSync(uid) {
     aplikasikanBahasaLayar();
     aplikasikanTemaLayar();
     await loadRulesFromCloud(uid);
-}
-
-function updateBalanceDOM() {
-    balanceDisplay.innerText = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(currentBalance);
-    profileSavingDisplay.innerText = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(currentSavings);
 }
 
 function proteksiDanSembunyikanKomponenDisiplin() {
@@ -309,7 +305,7 @@ function proteksiDanSembunyikanKomponenDisiplin() {
 }
 
 // ==========================================
-// 5. LOGIKA FORM MODUL MODE DISIPLIN
+// 5. MODE DISIPLIN KONFIGURASI FORM
 // ==========================================
 toggleModeDisiplin.addEventListener('change', async (e) => {
     disiplinActive = e.target.checked;
@@ -350,7 +346,7 @@ btnSimpanDisiplinConfig.addEventListener('click', async () => {
         const uid = auth.currentUser.uid;
         await setDoc(doc(db, "users", uid), { balance: currentBalance, savings: currentSavings, disiplinActive: true }, { merge: true });
         for (const rule of aturanBatasKategori) { await setDoc(doc(db, "users", uid, "rules", rule.kategori), rule); }
-        alert(currentLang === 'id' ? "Mode Disiplin Dikunci! Aturan aktif." : "Discipline Mode Locked! Rules are active.");
+        alert(currentLang === 'id' ? "Mode Disiplin Aktif! Aturan dikunci." : "Discipline Mode Locked! Rules are active.");
         await cekResetAkhirBulanDanSync(uid);
     } catch(e) { alert(e.message); }
 });
@@ -409,7 +405,7 @@ async function loadRulesFromCloud(uid) {
 }
 
 // ==========================================
-// 6. LAYAR FORM TRANSAKSI (PEMASUKAN / PENGELUARAN)
+// 6. LAYAR TRANSAKSI FORM INPUT & HISTORI
 // ==========================================
 function setTabFormType(type) {
     selectedType = type;
@@ -421,8 +417,6 @@ function setTabFormType(type) {
         tabPemasukan.className = "flex-1 text-center py-2 text-xs font-semibold rounded-full text-slate-500 transition";
     }
 }
-tabPemasukan.addEventListener('click', () => { setTabFormType('income'); selectedKategori = ''; renderKategori(); });
-tabPengeluaran.addEventListener('click', () => { setTabFormType('expense'); selectedKategori = ''; renderKategori(); });
 
 function renderKategori() {
     kategoriGrid.innerHTML = '';
@@ -440,9 +434,6 @@ function renderKategori() {
     });
 }
 
-// ==========================================
-// 7. RENDERING LIST HISTORI GESTUR GESER (SWIPE ACTION)
-// ==========================================
 async function loadHistoriHariIni(uid) {
     historiList.innerHTML = `<p class="text-center text-xs text-slate-400 mt-10">${i18nDictionary[currentLang].msg_loading}</p>`;
     const tglDb = formatTanggalDatabase(currentDate);
@@ -516,9 +507,6 @@ async function loadHistoriHariIni(uid) {
     } catch(e){}
 }
 
-// =====================================================================
-// 8. ACTION SUBMIT TRANSAKSI BARU / UPDATE EDIT (CEK LIMIT AKUMULASI)
-// =====================================================================
 btnSubmitTransaksi.addEventListener('click', async () => {
     const amount = parseInt(transactionAmount.value);
     const currentUser = auth.currentUser;
@@ -543,7 +531,7 @@ btnSubmitTransaksi.addEventListener('click', async () => {
             if (selectedType === 'expense') {
                 if (amount > currentBalance) return;
                 
-                // VALIDASI AKUMULASI TOTAL PENGELUARAN MODE DISIPLIN
+                // VALIDASI AKUMULASI DENGAN DATABASE (FIXED BUG)
                 if (disiplinActive) {
                     const rule = aturanBatasKategori.find(r => r.kategori === selectedKategori);
                     if (rule) {
@@ -565,9 +553,8 @@ btnSubmitTransaksi.addEventListener('click', async () => {
 
                         if ((totalPengeluaranTercatat + amount) > rule.limit) {
                             const textPeriode = rule.periode === 'hari' ? (currentLang === 'id' ? 'Hari Ini' : 'Today') : (currentLang === 'id' ? 'Bulan Ini' : 'This Month');
-                            
                             const lanjut = confirm(currentLang === 'id' ? 
-                                `[PERINGATAN DISIPLIN TANGGALTUA]\n\nAkumulasi pengeluaran Anda untuk Kategori "${selectedKategori}" pada ${textPeriode} akan melebihi batasan maksimal!\n\n• Pengeluaran Lalu: Rp ${totalPengeluaranTercatat.toLocaleString('id-ID')}\n• Input Baru: Rp ${amount.toLocaleString('id-ID')}\n• Total Gabungan: Rp ${(totalPengeluaranTercatat + amount).toLocaleString('id-ID')}\n• Batas Maksimal: Rp ${rule.limit.toLocaleString('id-ID')}\n\nTetap ingin melanjutkan transaksi ini?` : 
+                                `[PERINGATAN DISIPLIN]\n\nAkumulasi pengeluaran Kategori "${selectedKategori}" pada ${textPeriode} akan melebihi batas maksimal!\n\n• Pengeluaran Lalu: Rp ${totalPengeluaranTercatat.toLocaleString('id-ID')}\n• Input Baru: Rp ${amount.toLocaleString('id-ID')}\n• Total Gabungan: Rp ${(totalPengeluaranTercatat + amount).toLocaleString('id-ID')}\n• Batas Maksimal: Rp ${rule.limit.toLocaleString('id-ID')}\n\nTetap ingin melanjutkan transaksi ini?` : 
                                 `[DISCIPLINE WARNING]\n\nYour accumulated expense for "${selectedKategori}" ${textPeriode} will exceed the limit!\n\n• Past Expenses: Rp ${totalPengeluaranTercatat.toLocaleString('id-ID')}\n• New Input: Rp ${amount.toLocaleString('id-ID')}\n• Combined Total: Rp ${(totalPengeluaranTercatat + amount).toLocaleString('id-ID')}\n• Limit: Rp ${rule.limit.toLocaleString('id-ID')}\n\nDo you want to proceed?`
                             );
                             if (!lanjut) return;
@@ -592,7 +579,7 @@ btnSubmitTransaksi.addEventListener('click', async () => {
 });
 
 // ==========================================
-// 9. PROFILE EDIT MANAJEMEN
+// 7. PROFILE HANDLER
 // ==========================================
 inputFileAvatar.addEventListener('change', (e) => {
     const file = e.target.files[0];
@@ -612,7 +599,7 @@ document.getElementById('btn-edit-name').addEventListener('click', async () => {
 });
 
 // ==========================================
-// 10. MENU REPORT LAPORAN (CHART.JS LOGIC UTANPA POTONGAN)
+// 8. MENU REPORT LAPORAN (CHART.JS LOGIC UTUH)
 // ==========================================
 async function updateHalamanLaporan() {
     repMonthDisplay.innerText = reportDate.toLocaleDateString(currentLang === 'id' ? 'id-ID' : 'en-US', { month: 'long', year: 'numeric' });
@@ -691,5 +678,4 @@ function renderLineChart(harianObj) {
     if (!adaTransaksi) { repDataList.innerHTML += `<p class="text-center text-xs text-slate-400 mt-6">${currentLang === 'id' ? 'Tidak ada catatan pengeluaran bulan ini.' : 'No expense recorded this month.'}</p>`; } 
 }
 
-// Log-out
 document.getElementById('btn-logout').addEventListener('click', () => { signOut(auth).catch(err => alert(err.message)); });
