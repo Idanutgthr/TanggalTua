@@ -1,7 +1,6 @@
 // dashboard.js
 import { auth, db } from "./firebase-config.js";
 import { signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
-// FIX: Memperbaiki URL import Firestore yang salah pada versi sebelumnya
 import { doc, getDoc, setDoc, collection, addDoc, query, where, getDocs, orderBy, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
 
 // ==========================================
@@ -47,16 +46,10 @@ const inputFileAvatar = document.getElementById('input-file-avatar');
 const imgUserAvatar = document.getElementById('img-user-avatar');
 const iconUserDefault = document.getElementById('icon-user-default');
 
-// DOM Elemen Dropdown Akun
-const btnDropdownBahasa = document.getElementById('btn-dropdown-bahasa');
-const boxSelectBahasa = document.getElementById('box-select-bahasa');
-const btnDropdownTema = document.getElementById('btn-dropdown-tema');
-const boxSelectTema = document.getElementById('box-select-tema');
-
 // ==========================================
 // GLOBAL STATE APP
 // ==========================================
-let currentDate = new Date(); 
+let currentDate = new Date(); // Otomatis mengikat ke penanggalan hari ini secara real-time
 let reportDate = new Date();  
 let currentBalance = 0;
 let currentSavings = 0; 
@@ -70,143 +63,33 @@ let aturanBatasKategori = [];
 let ruleSelectedKategori = '';
 let ruleSelectedPeriod = 'hari'; 
 
-// State Preferensi User (ID/EN & Light/Dark)
-let currentLang = 'id'; 
-let currentTheme = 'light'; 
-
-// Kumpulan Kamus Lokalisasi Multi-Bahasa
-const i18nDictionary = {
-    id: {
-        my_balance: "Saldo Saya", histori: "Histori", btn_transaksi: "Transaksi",
-        tab_income: "Pemasukan", tab_expense: "Pengeluaran", input_nominal_holder: "Masukkan Nominal...",
-        cancel: "Batal", submit: "Simpan", mode_disiplin: "Mode Disiplin", saving: "Tabungan",
-        lvl_kustom: "Kustom", lvl_sulit: "Sulit", lvl_sedang: "Sedang", lvl_mudah: "Mudah",
-        btn_add_rule: "Tambah Aturan", save: "Simpan", pick_category: "Pilih Kategori Pengeluaran",
-        rule_daily: "Perhari", rule_monthly: "Perbulan", max_nominal: "Nominal Maksimal",
-        my_savings: "Tabungan Saya", lang_label: "Bahasa", theme_label: "Mode Layar",
-        makan: "Makan", belanja: "Belanja", pajak: "Pajak", transportasi: "Transportasi", medis: "Medis", hiburan: "Hiburan", lainnya: "Lainnya",
-        gaji: "Gaji", investasi: "Investasi", bonus: "Bonus", uang_saku: "Uang Saku",
-        msg_empty: "Belum ada transaksi hari ini.", msg_loading: "Memuat data...",
-        text_perhari: "Per Hari", text_perbulan: "Per Bulan"
-    },
-    en: {
-        my_balance: "My Balance", histori: "History", btn_transaksi: "Transaction",
-        tab_income: "Income", tab_expense: "Expense", input_nominal_holder: "Enter Amount...",
-        cancel: "Cancel", submit: "Submit", mode_disiplin: "Discipline Mode", saving: "Savings",
-        lvl_kustom: "Custom", lvl_sulit: "Hard", lvl_sedang: "Medium", lvl_mudah: "Easy",
-        btn_add_rule: "Add Rule", save: "Save", pick_category: "Choose Expense Category",
-        rule_daily: "Daily", rule_monthly: "Monthly", max_nominal: "Maximum Amount",
-        my_savings: "My Savings", lang_label: "Language", theme_label: "Screen Mode",
-        makan: "Food", belanja: "Shopping", pajak: "Tax", transportasi: "Transport", medis: "Medical", hiburan: "Entertainment", lainnya: "Others",
-        gaji: "Salary", investasi: "Investment", bonus: "Bonus", uang_saku: "Pocket Money",
-        msg_empty: "No transactions recorded today.", msg_loading: "Loading data...",
-        text_perhari: "Per Day", text_perbulan: "Per Month"
-    }
-};
-
 const kategoriData = {
     expense: [
-        { name: 'Makan', key: 'makan', icon: 'fa-utensils', color: 'text-sky-400' },
-        { name: 'Belanja', key: 'belanja', icon: 'fa-bag-shopping', color: 'text-purple-400' },
-        { name: 'Pajak', key: 'pajak', icon: 'fa-money-bill-wave', color: 'text-emerald-400' },
-        { name: 'Transportasi', key: 'transportasi', icon: 'fa-car', color: 'text-green-500' },
-        { name: 'Medis', key: 'medis', icon: 'fa-kit-medical', color: 'text-red-500' },
-        { name: 'Hiburan', key: 'hiburan', icon: 'fa-gamepad', color: 'text-amber-500' },
-        { name: 'Lainnya', key: 'lainnya', icon: 'fa-window-maximize', color: 'text-yellow-600' }
+        { name: 'Makan', icon: 'fa-utensils', color: 'text-sky-400' },
+        { name: 'Belanja', icon: 'fa-bag-shopping', color: 'text-purple-400' },
+        { name: 'Pajak', icon: 'fa-money-bill-wave', color: 'text-emerald-400' },
+        { name: 'Transportasi', icon: 'fa-car', color: 'text-green-500' },
+        { name: 'Medis', icon: 'fa-kit-medical', color: 'text-red-500' },
+        { name: 'Hiburan', icon: 'fa-gamepad', color: 'text-amber-500' },
+        { name: 'Lainnya', icon: 'fa-window-maximize', color: 'text-yellow-600' }
     ],
     income: [
-        { name: 'Gaji', key: 'gaji', icon: 'fa-wallet', color: 'text-blue-500' },
-        { name: 'Investasi', key: 'investasi', icon: 'fa-chart-line', color: 'text-emerald-500' },
-        { name: 'Bonus', key: 'bonus', icon: 'fa-gift', color: 'text-amber-500' },
-        { name: 'Uang Saku', key: 'uang_saku', icon: 'fa-coins', color: 'text-teal-400' }
+        { name: 'Gaji', icon: 'fa-wallet', color: 'text-blue-500' },
+        { name: 'Investasi', icon: 'fa-chart-line', color: 'text-emerald-500' },
+        { name: 'Bonus', icon: 'fa-gift', color: 'text-amber-500' },
+        { name: 'Uang Saku', icon: 'fa-coins', color: 'text-teal-400' }
     ]
 };
 
-const reportTypes = ['pemasukan', 'pengeluaran', 'rata-rata'];
-let currentTypeIndex = 1; 
-let activeChartInstance = null; 
-
 // ==========================================
-// 1. SISTEM PERUBAHAN BAHASA & TEMA LAYAR
-// ==========================================
-function aplikasikanBahasaLayar() {
-    document.querySelectorAll('[data-i18n]').forEach(el => {
-        const key = el.getAttribute('data-i18n');
-        if (i18nDictionary[currentLang][key]) el.innerText = i18nDictionary[currentLang][key];
-    });
-    document.querySelectorAll('[data-i18n-holder]').forEach(el => {
-        const key = el.getAttribute('data-i18n-holder');
-        if (i18nDictionary[currentLang][key]) el.setAttribute('placeholder', i18nDictionary[currentLang][key]);
-    });
-    
-    if (document.getElementById('current-lang-text')) {
-        document.getElementById('current-lang-text').innerHTML = `${currentLang === 'id' ? 'Bahasa Indonesia' : 'English'} <i class="fa-solid fa-check text-[10px]"></i>`;
-    }
-    const idCheck = document.querySelector('.id-check');
-    const enCheck = document.querySelector('.en-check');
-    if (idCheck) idCheck.classList.toggle('hidden', currentLang !== 'id');
-    if (enCheck) enCheck.classList.toggle('hidden', currentLang !== 'en');
-    
-    updateTanggalLayar();
-    if (containers['laporan'].classList.contains('flex')) updateHalamanLaporan();
-}
-
-function aplikasikanTemaLayar() {
-    const htmlEl = document.documentElement;
-    if (currentTheme === 'dark') {
-        htmlEl.classList.add('dark');
-        if (document.getElementById('current-theme-text')) {
-            document.getElementById('current-theme-text').innerHTML = `${currentLang === 'id' ? 'Gelap' : 'Dark'} <i class="fa-solid fa-check text-[10px]"></i>`;
-        }
-        if (document.querySelector('.dark-check')) document.querySelector('.dark-check').classList.remove('hidden');
-        if (document.querySelector('.light-check')) document.querySelector('.light-check').classList.add('hidden');
-    } else {
-        htmlEl.classList.remove('dark');
-        if (document.getElementById('current-theme-text')) {
-            document.getElementById('current-theme-text').innerHTML = `${currentLang === 'id' ? 'Terang' : 'Light'} <i class="fa-solid fa-check text-[10px]"></i>`;
-        }
-        if (document.querySelector('.light-check')) document.querySelector('.light-check').classList.remove('hidden');
-        if (document.querySelector('.dark-check')) document.querySelector('.dark-check').classList.add('hidden');
-    }
-}
-
-if (btnDropdownBahasa) {
-    btnDropdownBahasa.addEventListener('click', (e) => { e.stopPropagation(); boxSelectBahasa.classList.toggle('hidden'); boxSelectTema.classList.add('hidden'); });
-}
-if (btnDropdownTema) {
-    btnDropdownTema.addEventListener('click', (e) => { e.stopPropagation(); boxSelectTema.classList.toggle('hidden'); boxSelectBahasa.classList.add('hidden'); });
-}
-window.addEventListener('click', () => { 
-    if (boxSelectBahasa) boxSelectBahasa.classList.add('hidden'); 
-    if (boxSelectTema) boxSelectTema.classList.add('hidden'); 
-});
-
-if (document.getElementById('opt-lang-id')) document.getElementById('opt-lang-id').addEventListener('click', () => simpanPreferensiUser('lang', 'id'));
-if (document.getElementById('opt-lang-en')) document.getElementById('opt-lang-en').addEventListener('click', () => simpanPreferensiUser('lang', 'en'));
-if (document.getElementById('opt-theme-light')) document.getElementById('opt-theme-light').addEventListener('click', () => simpanPreferensiUser('theme', 'light'));
-if (document.getElementById('opt-theme-dark')) document.getElementById('opt-theme-dark').addEventListener('click', () => simpanPreferensiUser('theme', 'dark'));
-
-async function simpanPreferensiUser(key, value) {
-    if (key === 'lang') currentLang = value;
-    if (key === 'theme') currentTheme = value;
-    
-    aplikasikanBahasaLayar();
-    aplikasikanTemaLayar();
-    
-    if (auth.currentUser) {
-        await setDoc(doc(db, "users", auth.currentUser.uid), { [key]: value }, { merge: true });
-    }
-}
-
-// ==========================================
-// 2. SISTEM NAVIGASI CORE UTAMA
+// 1. NAVIGATION ROUTING
 // ==========================================
 function pindahMenuUtama(targetMenu) {
     Object.keys(containers).forEach(menu => {
         if (menu === targetMenu) {
             containers[menu].classList.remove('hidden');
             containers[menu].classList.add('flex');
-            navItems[menu].className = "nav-item w-12 h-12 rounded-full bg-white dark:bg-slate-800 flex items-center justify-center shadow-md border border-pink-100 dark:border-slate-700 text-pink-500 text-base transition transform scale-110";
+            navItems[menu].className = "nav-item w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-md border border-pink-100 text-pink-500 text-base transition transform scale-110";
         } else {
             containers[menu].classList.add('hidden');
             containers[menu].classList.remove('flex');
@@ -214,38 +97,77 @@ function pindahMenuUtama(targetMenu) {
         }
     });
 }
-Object.keys(navItems).forEach(menu => { navItems[menu].addEventListener('click', () => { pindahMenuUtama(menu); if(menu==='laporan') updateHalamanLaporan(); }); });
+Object.keys(navItems).forEach(menu => { navItems[menu].addEventListener('click', () => pindahMenuUtama(menu)); });
 
-// ==========================================
-// 3. KALENDER MANAJEMEN HARIAN (MAX HARI INI)
-// ==========================================
-document.getElementById('btn-prev-date').addEventListener('click', () => { currentDate.setDate(currentDate.getDate() - 1); updateTanggalLayar(); });
+btnBukaInput.addEventListener('click', () => {
+    editingTransactionId = null;
+    btnSubmitTransaksi.innerText = "Submit";
+    subLayarHistori.classList.add('hidden');
+    subLayarInput.classList.remove('hidden');
+    renderKategori();
+});
+
+btnCancelTransaksi.addEventListener('click', () => {
+    subLayarInput.classList.add('hidden');
+    subLayarHistori.classList.remove('hidden');
+    transactionAmount.value = '';
+    selectedKategori = '';
+    editingTransactionId = null;
+});
+
+// =====================================================================
+// 2. LOGIKA KALENDER HARIAN (FIXED BUG: BATASI MAKSIMAL HARI INI)
+// =====================================================================
+function formatTanggalString(dateObj) { 
+    return dateObj.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }); 
+}
+
+function formatTanggalDatabase(dateObj) { 
+    return `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`; 
+}
+
+// Tombol Hari Sebelumnya: Selalu bebas diklik
+document.getElementById('btn-prev-date').addEventListener('click', () => {
+    currentDate.setDate(currentDate.getDate() - 1);
+    updateTanggalLayar();
+});
+
+// Tombol Hari Selanjutnya: Dikunci jika mencoba melewati hari ini
 document.getElementById('btn-next-date').addEventListener('click', () => {
     const hariIni = new Date();
+    
+    // Gandakan objek tanggal berjalan untuk simulasi hari esok
     const cloneNextDate = new Date(currentDate.getTime());
     cloneNextDate.setDate(cloneNextDate.getDate() + 1);
+    
+    // Netralkan jam untuk komparasi murni (Tanggal, Bulan, Tahun)
     cloneNextDate.setHours(0, 0, 0, 0);
     hariIni.setHours(0, 0, 0, 0);
 
     if (cloneNextDate > hariIni) {
-        alert(currentLang === 'id' ? "Tidak dapat melihat atau mencatat transaksi untuk hari esok!" : "Cannot view or log transactions for tomorrow!");
+        alert("Tidak dapat melihat atau mencatat transaksi untuk hari esok!");
         return;
     }
+
     currentDate.setDate(currentDate.getDate() + 1);
     updateTanggalLayar();
 });
 
+function updateTanggalLayar() { 
+    currentDateDisplay.innerText = formatTanggalString(currentDate); 
+    if(auth.currentUser) loadHistoriHariIni(auth.currentUser.uid); 
+}
+
 // ==========================================
-// 4. SYNC FIREBASE CLOUD & DETEKSI AWAL BULAN
+// 3. REALTIME FIRESTORE SYNC & AUTO RESET
 // ==========================================
 onAuthStateChanged(auth, async (user) => {
     if (user) {
-        document.getElementById('user-display-name').innerText = user.displayName || "User TanggalTua";
+        document.getElementById('user-display-name').innerText = user.displayName || "Pengguna TanggalTua";
         document.getElementById('user-email').innerText = user.email;
         if (user.photoURL) { imgUserAvatar.src = user.photoURL; imgUserAvatar.classList.remove('hidden'); iconUserDefault.classList.add('hidden'); }
-        
         await cekResetAkhirBulanDanSync(user.uid);
-        pindahMenuUtama('transaksi'); 
+        updateTanggalLayar();
     } else {
         window.location.href = "index.html";
     }
@@ -262,29 +184,32 @@ async function cekResetAkhirBulanDanSync(uid) {
         currentBalance = data.balance || 0;
         currentSavings = data.savings || 0;
         disiplinActive = data.disiplinActive || false;
-        currentLang = data.lang || 'id';
-        currentTheme = data.theme || 'light';
         
         const lastResetMonth = data.lastResetMonth || stringBulanSekarang;
         
         if (lastResetMonth !== stringBulanSekarang && currentBalance > 0) {
             currentSavings += currentBalance;
-            alert(currentLang === 'id' ? `Periode baru dimulai! Sisa saldo bulan lalu sebesar Rp ${currentBalance.toLocaleString('id-ID')} otomatis dialihkan ke tabungan.` : `New period started! Remaining balance of Rp ${currentBalance.toLocaleString('id-ID')} has been auto-saved.`);
+            alert(`Periode baru dimulai! Sisa uang bulan lalu sebesar Rp ${currentBalance.toLocaleString('id-ID')} otomatis dimasukkan ke tabungan.`);
             currentBalance = 0;
             disiplinActive = false; 
+            
             await setDoc(userRef, { balance: currentBalance, savings: currentSavings, lastResetMonth: stringBulanSekarang, disiplinActive: false }, { merge: true });
         }
     } else {
-        await setDoc(userRef, { balance: 0, savings: 0, lastResetMonth: stringBulanSekarang, disiplinActive: false, lang: 'id', theme: 'light' });
+        await setDoc(userRef, { balance: 0, savings: 0, lastResetMonth: stringBulanSekarang, disiplinActive: false });
     }
     
     toggleModeDisiplin.checked = disiplinActive;
     proteksiDanSembunyikanKomponenDisiplin();
+    boxKonfigurasiDisiplin.classList.toggle('hidden', !disiplinActive);
     updateBalanceDOM();
     hitungPersenTabungan(); 
-    aplikasikanBahasaLayar();
-    aplikasikanTemaLayar();
     await loadRulesFromCloud(uid);
+}
+
+function updateBalanceDOM() {
+    balanceDisplay.innerText = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(currentBalance);
+    profileSavingDisplay.innerText = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(currentSavings);
 }
 
 function proteksiDanSembunyikanKomponenDisiplin() {
@@ -305,7 +230,7 @@ function proteksiDanSembunyikanKomponenDisiplin() {
 }
 
 // ==========================================
-// 5. MODE DISIPLIN KONFIGURASI FORM
+// 4. FORM LOGIKA MENU MODE DISIPLIN
 // ==========================================
 toggleModeDisiplin.addEventListener('change', async (e) => {
     disiplinActive = e.target.checked;
@@ -316,27 +241,31 @@ toggleModeDisiplin.addEventListener('change', async (e) => {
 const lvlButtons = { 'kustom': document.getElementById('lvl-kustom'), 'sulit': document.getElementById('lvl-sulit'), 'sedang': document.getElementById('lvl-sedang'), 'mudah': document.getElementById('lvl-mudah') };
 Object.keys(lvlButtons).forEach(lvl => {
     lvlButtons[lvl].addEventListener('click', () => {
-        Object.values(lvlButtons).forEach(b => b.className = "py-2 rounded-lg text-slate-600 dark:text-slate-400");
-        lvlButtons[lvl].className = "py-2 rounded-lg text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-700 shadow-sm";
+        Object.values(lvlButtons).forEach(b => b.className = "py-2 rounded-lg text-slate-600");
+        lvlButtons[lvl].className = "py-2 rounded-lg text-slate-600 bg-white shadow-sm";
         tipeMenabungLevel = lvl;
         hitungPersenTabungan();
     });
 });
 
 function hitungPersenTabungan() {
-    if (disiplinActive && btnSimpanDisiplinConfig.classList.contains('hidden')) return;
+    if (disiplinActive && btnSimpanDisiplinConfig.classList.contains('hidden')) return; 
+
     let persen = 0;
     if (tipeMenabungLevel === 'mudah') persen = 10;
     else if (tipeMenabungLevel === 'sedang') persen = 20;
     else if (tipeMenabungLevel === 'sulit') persen = 30;
     
-    labelTabunganPersen.innerText = `${i18nDictionary[currentLang].saving} (${persen}%)`;
-    if (tipeMenabungLevel !== 'kustom') inputNilaiTabungan.value = Math.round(currentBalance * (persen / 100));
+    labelTabunganPersen.innerText = `Tabungan (${persen}%)`;
+    if (tipeMenabungLevel !== 'kustom') {
+        inputNilaiTabungan.value = Math.round(currentBalance * (persen / 100));
+    }
 }
 
 btnSimpanDisiplinConfig.addEventListener('click', async () => {
     const tabunganVal = parseInt(inputNilaiTabungan.value) || 0;
-    if (tabunganVal <= 0 || tabunganVal > currentBalance) { alert("Nominal alokasi dana tabungan tidak valid."); return; }
+    if (tabunganVal <= 0) { alert("Harap masukkan nilai tabungan yang valid."); return; }
+    if (tabunganVal > currentBalance) { alert("Dana alokasi tabungan melebihi jumlah sisa saldo berjalan Anda!"); return; }
 
     currentBalance -= tabunganVal;
     currentSavings += tabunganVal;
@@ -346,23 +275,27 @@ btnSimpanDisiplinConfig.addEventListener('click', async () => {
         const uid = auth.currentUser.uid;
         await setDoc(doc(db, "users", uid), { balance: currentBalance, savings: currentSavings, disiplinActive: true }, { merge: true });
         for (const rule of aturanBatasKategori) { await setDoc(doc(db, "users", uid, "rules", rule.kategori), rule); }
-        alert(currentLang === 'id' ? "Mode Disiplin Aktif! Aturan dikunci." : "Discipline Mode Locked! Rules are active.");
+        
+        alert("Mode Disiplin Aktif! Aturan dikunci dan dana tabungan berhasil dikirim ke akun.");
         await cekResetAkhirBulanDanSync(uid);
     } catch(e) { alert(e.message); }
 });
 
+// ==========================================
+// SUB ATURAN KATEGORI DISIPLIN
+// ==========================================
 btnTambahAturan.addEventListener('click', () => { subDisiplinUtama.classList.add('hidden'); subDisiplinRulesPicker.classList.remove('hidden'); renderKategoriRulesSelection(); });
 btnCancelRule.addEventListener('click', () => { subDisiplinRulesPicker.classList.add('hidden'); subDisiplinUtama.classList.remove('hidden'); ruleSelectedKategori = ''; });
 
-tabRulePerhari.addEventListener('click', () => { ruleSelectedPeriod = 'hari'; tabRulePerhari.className = "flex-1 bg-white dark:bg-slate-700 text-center py-1.5 text-xs font-bold rounded-full text-slate-800 dark:text-white shadow-sm"; tabRulePerbulan.className = "flex-1 text-center py-1.5 text-xs font-semibold rounded-full text-slate-500"; });
-tabRulePerbulan.addEventListener('click', () => { ruleSelectedPeriod = 'bulan'; tabRulePerbulan.className = "flex-1 bg-white dark:bg-slate-700 text-center py-1.5 text-xs font-bold rounded-full text-slate-800 dark:text-white shadow-sm"; tabRulePerhari.className = "flex-1 text-center py-1.5 text-xs font-semibold rounded-full text-slate-500"; });
+tabRulePerhari.addEventListener('click', () => { ruleSelectedPeriod = 'hari'; tabRulePerhari.className = "flex-1 bg-white text-center py-1.5 text-xs font-bold rounded-full text-slate-800 shadow-sm"; tabRulePerbulan.className = "flex-1 text-center py-1.5 text-xs font-semibold rounded-full text-slate-500"; });
+tabRulePerbulan.addEventListener('click', () => { ruleSelectedPeriod = 'bulan'; tabRulePerbulan.className = "flex-1 bg-white text-center py-1.5 text-xs font-bold rounded-full text-slate-800 shadow-sm"; tabRulePerhari.className = "flex-1 text-center py-1.5 text-xs font-semibold rounded-full text-slate-500"; });
 
 function renderKategoriRulesSelection() {
     gridKategoriRules.innerHTML = '';
     kategoriData.expense.forEach(kat => {
         const box = document.createElement('div');
-        box.className = "flex flex-col items-center p-2 rounded-xl cursor-pointer bg-slate-50 dark:bg-slate-800 border border-transparent hover:bg-pink-50";
-        box.innerHTML = `<div class="w-10 h-10 bg-white dark:bg-slate-700 rounded-lg flex items-center justify-center shadow-sm text-base ${kat.color}"><i class="fa-solid ${kat.icon}"></i></div><span class="text-[9px] font-bold mt-1 text-slate-700 dark:text-slate-300">${i18nDictionary[currentLang][kat.key]}</span>`;
+        box.className = "flex flex-col items-center p-2 rounded-xl cursor-pointer bg-slate-50 border border-transparent hover:bg-pink-50";
+        box.innerHTML = `<div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm text-base ${kat.color}"><i class="fa-solid ${kat.icon}"></i></div><span class="text-[9px] font-bold mt-1 text-slate-700">${kat.name}</span>`;
         box.addEventListener('click', () => { document.querySelectorAll('#grid-kategori-rules > div').forEach(el => el.classList.remove('bg-pink-100', 'border-pink-300')); box.classList.add('bg-pink-100', 'border-pink-300'); ruleSelectedKategori = kat.name; });
         gridKategoriRules.appendChild(box);
     });
@@ -370,7 +303,7 @@ function renderKategoriRulesSelection() {
 
 btnSaveRule.addEventListener('click', () => {
     const limit = parseInt(inputNominalMaksimalRule.value) || 0;
-    if (!ruleSelectedKategori || limit <= 0) return;
+    if (!ruleSelectedKategori || limit <= 0) { alert("Lengkapi data kriteria batasan."); return; }
     aturanBatasKategori = aturanBatasKategori.filter(r => r.kategori !== ruleSelectedKategori);
     aturanBatasKategori.push({ kategori: ruleSelectedKategori, periode: ruleSelectedPeriod, limit: limit });
     renderRulesListDOM();
@@ -381,19 +314,15 @@ function renderRulesListDOM() {
     rulesListContainer.innerHTML = '';
     aturanBatasKategori.forEach(rule => {
         const row = document.createElement('div');
-        row.className = "bg-pink-50/60 dark:bg-slate-800 border border-pink-100 dark:border-slate-700 rounded-xl p-3 flex justify-between items-center text-xs";
-        const htmlTombolHapus = disiplinActive ? '' : `<button class="block text-[9px] text-red-400 font-bold hover:underline mt-0.5" onclick="hapusRuleLokal('${rule.kategori}')">${i18nDictionary[currentLang].cancel}</button>`;
-        const katObj = kategoriData.expense.find(k => k.name === rule.kategori);
-        const labelKategoriLokalisasi = katObj ? i18nDictionary[currentLang][katObj.key] : rule.kategori;
-        const txtPeriode = rule.periode === 'hari' ? i18nDictionary[currentLang].rule_daily : i18nDictionary[currentLang].rule_monthly;
-
-        row.innerHTML = `<div><p class="font-bold text-slate-800 dark:text-slate-200">${labelKategoriLokalisasi}</p><p class="text-[9px] text-slate-400 dark:text-slate-400">Max: ${txtPeriode}</p></div><div class="text-right"><span class="font-black text-slate-700 dark:text-white">Rp ${rule.limit.toLocaleString('id-ID')}</span>${htmlTombolHapus}</div>`;
+        row.className = "bg-pink-50/60 border border-pink-100 rounded-xl p-3 flex justify-between items-center text-xs";
+        const htmlTombolHapus = disiplinActive ? '' : `<button class="block text-[9px] text-red-400 font-bold hover:underline mt-0.5" onclick="hapusRuleLokal('${rule.kategori}')">Hapus</button>`;
+        row.innerHTML = `<div><p class="font-bold text-slate-800">${rule.kategori}</p><p class="text-[9px] text-slate-400">Batas Maksimal: Per ${rule.periode}</p></div><div class="text-right"><span class="font-black text-slate-700">Rp ${rule.limit.toLocaleString('id-ID')}</span>${htmlTombolHapus}</div>`;
         rulesListContainer.appendChild(row);
     });
 }
 
 window.hapusRuleLokal = async (katName) => {
-    if (disiplinActive) return;
+    if (disiplinActive) return; 
     aturanBatasKategori = aturanBatasKategori.filter(r => r.kategori !== katName);
     if(auth.currentUser) { try { await deleteDoc(doc(db, "users", auth.currentUser.uid, "rules", katName)); } catch(e){} }
     renderRulesListDOM();
@@ -405,64 +334,67 @@ async function loadRulesFromCloud(uid) {
 }
 
 // ==========================================
-// 6. LAYAR TRANSAKSI FORM INPUT & HISTORI
+// 5. MANAJEMEN INPUT FORM UTAMA
 // ==========================================
 function setTabFormType(type) {
     selectedType = type;
     if (type === 'income') {
-        tabPemasukan.className = "flex-1 bg-white dark:bg-slate-700 text-center py-2 text-xs font-bold rounded-full text-slate-800 dark:text-white shadow-sm transition";
+        tabPemasukan.className = "flex-1 bg-white text-center py-2 text-xs font-bold rounded-full text-slate-800 shadow-sm transition";
         tabPengeluaran.className = "flex-1 text-center py-2 text-xs font-semibold rounded-full text-slate-500 transition";
     } else {
-        tabPengeluaran.className = "flex-1 bg-white dark:bg-slate-700 text-center py-2 text-xs font-bold rounded-full text-slate-800 dark:text-white shadow-sm transition";
+        tabPengeluaran.className = "flex-1 bg-white text-center py-2 text-xs font-bold rounded-full text-slate-800 shadow-sm transition";
         tabPemasukan.className = "flex-1 text-center py-2 text-xs font-semibold rounded-full text-slate-500 transition";
     }
 }
+tabPemasukan.addEventListener('click', () => { setTabFormType('income'); selectedKategori = ''; renderKategori(); });
+tabPengeluaran.addEventListener('click', () => { setTabFormType('expense'); selectedKategori = ''; renderKategori(); });
 
 function renderKategori() {
     kategoriGrid.innerHTML = '';
     kategoriData[selectedType].forEach(kat => {
         const itemBox = document.createElement('div');
-        const activeStyle = (kat.name === selectedKategori) ? 'bg-pink-100 border-pink-300 dark:bg-slate-700' : 'border-transparent';
-        itemBox.className = `flex flex-col items-center p-2 rounded-xl cursor-pointer hover:bg-pink-50 dark:hover:bg-slate-800 transition border ${activeStyle}`;
-        itemBox.innerHTML = `<div class="w-12 h-12 bg-slate-50 dark:bg-slate-800 rounded-xl flex items-center justify-center shadow-inner mb-1 text-xl ${kat.color}"><i class="fa-solid ${kat.icon}"></i></div><span class="text-[10px] font-medium text-slate-700 dark:text-slate-300">${i18nDictionary[currentLang][kat.key]}</span>`;
+        const activeStyle = (kat.name === selectedKategori) ? 'bg-pink-100 border-pink-300' : 'border-transparent';
+        itemBox.className = `flex flex-col items-center p-2 rounded-xl cursor-pointer hover:bg-pink-50 transition border ${activeStyle}`;
+        itemBox.innerHTML = `<div class="w-12 h-12 bg-slate-50 rounded-xl flex items-center justify-center shadow-inner mb-1 text-xl ${kat.color}"><i class="fa-solid ${kat.icon}"></i></div><span class="text-[10px] font-medium text-slate-700">${kat.name}</span>`;
         itemBox.addEventListener('click', () => {
-            document.querySelectorAll('#kategori-grid > div').forEach(el => el.classList.remove('bg-pink-100', 'border-pink-300', 'dark:bg-slate-700'));
-            itemBox.classList.add('bg-pink-100', 'border-pink-300', 'dark:bg-slate-700');
+            document.querySelectorAll('#kategori-grid > div').forEach(el => el.classList.remove('bg-pink-100', 'border-pink-300'));
+            itemBox.classList.add('bg-pink-100', 'border-pink-300');
             selectedKategori = kat.name;
         });
         kategoriGrid.appendChild(itemBox);
     });
 }
 
+// ==========================================
+// 6. SWIPE GESTURE & LIST HISTORI
+// ==========================================
 async function loadHistoriHariIni(uid) {
-    historiList.innerHTML = `<p class="text-center text-xs text-slate-400 mt-10">${i18nDictionary[currentLang].msg_loading}</p>`;
+    historiList.innerHTML = '';
     const tglDb = formatTanggalDatabase(currentDate);
     try {
         const q = query(collection(db, "transactions"), where("uid", "==", uid), where("dateStr", "==", tglDb), orderBy("timestamp", "desc"));
         const snap = await getDocs(q);
-        historiList.innerHTML = '';
-        if (snap.empty) { historiList.innerHTML = `<p class="text-center text-xs text-slate-400 mt-10">${i18nDictionary[currentLang].msg_empty}</p>`; return; }
+        if (snap.empty) { historiList.innerHTML = '<p class="text-center text-xs text-slate-400 mt-10">Belum ada transaksi hari ini.</p>'; return; }
 
         snap.forEach((documentSnapshot) => {
             const data = documentSnapshot.data();
             const id = documentSnapshot.id;
             const sign = data.type === 'income' ? '+' : '-';
-            const color = data.type === 'income' ? 'text-green-600' : 'text-slate-700 dark:text-slate-300';
+            const color = data.type === 'income' ? 'text-green-600' : 'text-slate-700';
             const kf = [...kategoriData.expense, ...kategoriData.income].find(k => k.name === data.kategori);
-            const namaKategoriTerjemahan = kf ? i18nDictionary[currentLang][kf.key] : data.kategori;
 
             const itemWrapper = document.createElement('div');
-            itemWrapper.className = "relative overflow-hidden rounded-2xl min-h-[66px] w-full border border-pink-50 dark:border-slate-800 shadow-sm";
+            itemWrapper.className = "relative overflow-hidden rounded-2xl min-h-[66px] w-full border border-pink-50 shadow-sm";
             itemWrapper.innerHTML = `
-                <div class="absolute inset-0 bg-pink-100 dark:bg-slate-800 flex items-center justify-around px-4 z-0">
+                <div class="absolute inset-0 bg-pink-100 flex items-center justify-around px-4 z-0">
                     <button class="btn-swipe-hapus bg-[#f87171] text-white font-bold px-4 py-1.5 rounded-full text-xs shadow-sm">Hapus</button>
                     <button class="btn-swipe-edit bg-[#fbbf24] text-slate-800 font-bold px-5 py-1.5 rounded-full text-xs shadow-sm">Edit</button>
                     <button class="btn-swipe-batal bg-[#4ade80] text-white font-bold px-4 py-1.5 rounded-full text-xs shadow-sm">Batal</button>
                 </div>
-                <div class="layer-konten flex justify-between items-center bg-white dark:bg-slate-700 px-4 py-3 relative z-10 w-full h-full cursor-grab select-none">
+                <div class="layer-konten flex justify-between items-center bg-white px-4 py-3 relative z-10 w-full h-full transition-transform duration-300 transform translate-x-0 cursor-grab select-none">
                     <div class="flex items-center gap-3 pointer-events-none">
-                        <div class="w-10 h-10 bg-[#fbcfe8] dark:bg-slate-800 bg-opacity-40 rounded-xl flex items-center justify-center text-slate-700 dark:text-slate-300"><i class="fa-solid ${kf?kf.icon:'fa-tags'}"></i></div>
-                        <div><p class="text-xs font-bold text-slate-800 dark:text-white">${namaKategoriTerjemahan}</p><p class="text-[10px] text-slate-400">${data.timeStr}</p></div>
+                        <div class="w-10 h-10 bg-[#fbcfe8] bg-opacity-40 rounded-xl flex items-center justify-center text-slate-700"><i class="fa-solid ${kf?kf.icon:'fa-tags'}"></i></div>
+                        <div><p class="text-xs font-bold text-slate-800">${data.kategori}</p><p class="text-[10px] text-slate-400">${data.timeStr}</p></div>
                     </div>
                     <span class="text-xs font-bold ${color} pointer-events-none">${sign} Rp. ${data.amount.toLocaleString('id-ID')}</span>
                 </div>
@@ -474,18 +406,18 @@ async function loadHistoriHariIni(uid) {
             layerKonten.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; isSwiping = true; layerKonten.classList.remove('transition-transform'); });
             layerKonten.addEventListener('touchmove', (e) => { if (!isSwiping) return; currentX = e.touches[0].clientX; let diff = currentX - startX; if (diff < 0 && diff > -260) layerKonten.style.transform = `translateX(${diff}px)`; });
             layerKonten.addEventListener('touchend', () => { isSwiping = false; layerKonten.classList.add('transition-transform'); if (currentX - startX < -60) layerKonten.style.transform = 'translateX(-100%)'; else layerKonten.style.transform = 'translateX(0)'; });
-            
             layerKonten.addEventListener('mousedown', (e) => { startX = e.clientX; isSwiping = true; layerKonten.classList.remove('transition-transform'); });
             window.addEventListener('mousemove', (e) => { if (!isSwiping) return; currentX = e.clientX; let diff = currentX - startX; if (diff < 0 && diff > -260) layerKonten.style.transform = `translateX(${diff}px)`; });
             window.addEventListener('mouseup', () => { if (!isSwiping) return; isSwiping = false; layerKonten.classList.add('transition-transform'); if (currentX - startX < -60) layerKonten.style.transform = 'translateX(-100%)'; else layerKonten.style.transform = 'translateX(0)'; });
 
             itemWrapper.querySelector('.btn-swipe-batal').addEventListener('click', () => layerKonten.style.transform = 'translateX(0)');
             itemWrapper.querySelector('.btn-swipe-hapus').addEventListener('click', async () => {
-                if (confirm(currentLang === 'id' ? `Hapus catatan transaksi ${namaKategoriTerjemahan}?` : `Delete ${namaKategoriTerjemahan} transaction record?`)) {
+                if (confirm(`Hapus catatan transaksi ${data.kategori}?`)) {
                     if (data.type === 'income') currentBalance -= data.amount;
                     else currentBalance += data.amount;
                     await deleteDoc(doc(db, "transactions", id));
                     await setDoc(doc(db, "users", uid), { balance: currentBalance }, { merge: true });
+                    
                     proteksiDanSembunyikanKomponenDisiplin();
                     updateBalanceDOM();
                     loadHistoriHariIni(uid);
@@ -499,7 +431,7 @@ async function loadHistoriHariIni(uid) {
                 selectedKategori = data.kategori;
                 subLayarHistori.classList.add('hidden');
                 subLayarInput.classList.remove('hidden');
-                btnSubmitTransaksi.innerText = currentLang === 'id' ? "Simpan Perubahan" : "Save Changes";
+                btnSubmitTransaksi.innerText = "Simpan Perubahan";
                 renderKategori();
             });
             historiList.appendChild(itemWrapper);
@@ -507,10 +439,13 @@ async function loadHistoriHariIni(uid) {
     } catch(e){}
 }
 
+// =====================================================================
+// 7. INTERCEPTOR & EKSEKUSI DATA SUBMIT
+// =====================================================================
 btnSubmitTransaksi.addEventListener('click', async () => {
     const amount = parseInt(transactionAmount.value);
     const currentUser = auth.currentUser;
-    if (!amount || amount <= 0 || !selectedKategori) return;
+    if (!amount || amount <= 0 || !selectedKategori) { alert("Data form belum lengkap."); return; }
 
     try {
         const userRef = doc(db, "users", currentUser.uid);
@@ -522,16 +457,17 @@ btnSubmitTransaksi.addEventListener('click', async () => {
                 if (old.type === 'income') currentBalance -= old.amount;
                 else currentBalance += old.amount;
             }
-            if (selectedType === 'expense' && amount > currentBalance) return;
+            if (selectedType === 'expense' && amount > currentBalance) { alert("Saldo tidak cukup."); return; }
             if (selectedType === 'income') currentBalance += amount;
             else currentBalance -= amount;
 
             await updateDoc(doc(db, "transactions", editingTransactionId), { amount: amount, type: selectedType, kategori: selectedKategori });
+            alert("Berhasil diubah!");
         } else {
             if (selectedType === 'expense') {
-                if (amount > currentBalance) return;
+                if (amount > currentBalance) { alert("Saldo tidak mencukupi."); return; }
                 
-                // VALIDASI AKUMULASI DENGAN DATABASE (FIXED BUG)
+                // DETEKSI AKUMULASI BATASAN PENGELUARAN MODE DISIPLIN CLOUD
                 if (disiplinActive) {
                     const rule = aturanBatasKategori.find(r => r.kategori === selectedKategori);
                     if (rule) {
@@ -552,11 +488,8 @@ btnSubmitTransaksi.addEventListener('click', async () => {
                         });
 
                         if ((totalPengeluaranTercatat + amount) > rule.limit) {
-                            const textPeriode = rule.periode === 'hari' ? (currentLang === 'id' ? 'Hari Ini' : 'Today') : (currentLang === 'id' ? 'Bulan Ini' : 'This Month');
-                            const lanjut = confirm(currentLang === 'id' ? 
-                                `[PERINGATAN DISIPLIN]\n\nAkumulasi pengeluaran Kategori "${selectedKategori}" pada ${textPeriode} akan melebihi batas maksimal!\n\n• Pengeluaran Lalu: Rp ${totalPengeluaranTercatat.toLocaleString('id-ID')}\n• Input Baru: Rp ${amount.toLocaleString('id-ID')}\n• Total Gabungan: Rp ${(totalPengeluaranTercatat + amount).toLocaleString('id-ID')}\n• Batas Maksimal: Rp ${rule.limit.toLocaleString('id-ID')}\n\nTetap ingin melanjutkan transaksi ini?` : 
-                                `[DISCIPLINE WARNING]\n\nYour accumulated expense for "${selectedKategori}" ${textPeriode} will exceed the limit!\n\n• Past Expenses: Rp ${totalPengeluaranTercatat.toLocaleString('id-ID')}\n• New Input: Rp ${amount.toLocaleString('id-ID')}\n• Combined Total: Rp ${(totalPengeluaranTercatat + amount).toLocaleString('id-ID')}\n• Limit: Rp ${rule.limit.toLocaleString('id-ID')}\n\nDo you want to proceed?`
-                            );
+                            const textPeriode = rule.periode === 'hari' ? 'Hari Ini' : 'Bulan Ini';
+                            const lanjut = confirm(`[PERINGATAN DISIPLIN TANGGALTUA]\n\nAkumulasi pengeluaran Anda untuk Kategori "${selectedKategori}" pada ${textPeriode} akan melebihi batasan maksimal!\n\n• Pengeluaran Lalu: Rp ${totalPengeluaranTercatat.toLocaleString('id-ID')}\n• Input Baru: Rp ${amount.toLocaleString('id-ID')}\n• Total Gabungan: Rp ${(totalPengeluaranTercatat + amount).toLocaleString('id-ID')}\n• Batas Maksimal: Rp ${rule.limit.toLocaleString('id-ID')}\n\nTetap ingin melanjutkan transaksi ini?`);
                             if (!lanjut) return;
                         }
                     }
@@ -565,21 +498,24 @@ btnSubmitTransaksi.addEventListener('click', async () => {
             } else {
                 currentBalance += amount;
             }
+
             const skrg = new Date();
             const waktu = skrg.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }).replace('.', ':');
             await addDoc(collection(db, "transactions"), { uid: currentUser.uid, amount: amount, type: selectedType, kategori: selectedKategori, dateStr: formatTanggalDatabase(currentDate), timeStr: waktu, timestamp: Date.now() });
+            alert("Transaksi disimpan!");
         }
 
         await setDoc(userRef, { balance: currentBalance }, { merge: true });
+        
         proteksiDanSembunyikanKomponenDisiplin();
         updateBalanceDOM();
         btnCancelTransaksi.click();
         loadHistoriHariIni(currentUser.uid);
-    } catch(e){}
+    } catch(e){ alert(e.message); }
 });
 
 // ==========================================
-// 7. PROFILE HANDLER
+// 8. PROFILE & AVATAR MANAJEMEN
 // ==========================================
 inputFileAvatar.addEventListener('change', (e) => {
     const file = e.target.files[0];
@@ -587,25 +523,46 @@ inputFileAvatar.addEventListener('change', (e) => {
         const reader = new FileReader();
         reader.onloadend = async () => {
             imgUserAvatar.src = reader.result; imgUserAvatar.classList.remove('hidden'); iconUserDefault.classList.add('hidden');
-            if (auth.currentUser) await updateDoc(doc(db, "users", auth.currentUser.uid), { photoURL: reader.result });
+            if (auth.currentUser) await updateDoc(doc(db, "users", auth.currentUser.uid), { avatarBase64: reader.result });
         };
         reader.readAsDataURL(file);
     }
 });
 
 document.getElementById('btn-edit-name').addEventListener('click', async () => {
-    const nama = prompt(currentLang === 'id' ? "Nama profil baru:" : "Enter new profile name:", auth.currentUser.displayName);
-    if(nama) { document.getElementById('user-display-name').innerText = nama; await setDoc(doc(db, "users", auth.currentUser.uid), { displayName: nama }, { merge: true }); }
+    const nama = prompt("Nama profil baru:", auth.currentUser.displayName);
+    if(nama) { await updateProfile(auth.currentUser, { displayName: nama }); document.getElementById('user-display-name').innerText = nama; }
 });
 
 // ==========================================
-// 8. MENU REPORT LAPORAN (CHART.JS LOGIC UTUH)
+// 9. GRAFIK KONTEN LAPORAN (CHART.JS)
 // ==========================================
+const repBtnPrevMonth = document.getElementById('rep-btn-prev-month');
+const repBtnNextMonth = document.getElementById('rep-btn-next-month');
+const repMonthDisplay = document.getElementById('rep-month-display');
+const repTotalIncome = document.getElementById('rep-total-income');
+const repTotalSaving = document.getElementById('rep-total-saving'); 
+const repTotalExpense = document.getElementById('rep-total-expense');
+const repBtnPrevType = document.getElementById('rep-btn-prev-type');
+const repBtnNextType = document.getElementById('rep-btn-next-type');
+const repTypeDisplay = document.getElementById('rep-type-display');
+const repDataList = document.getElementById('rep-data-list');
+
+const reportTypes = ['pemasukan', 'pengeluaran', 'rata-rata'];
+let currentTypeIndex = 1; 
+let activeChartInstance = null; 
+
+repBtnPrevMonth.addEventListener('click', () => { reportDate.setMonth(reportDate.getMonth() - 1); updateHalamanLaporan(); });
+repBtnNextMonth.addEventListener('click', () => { reportDate.setMonth(reportDate.getMonth() + 1); updateHalamanLaporan(); });
+repBtnPrevType.addEventListener('click', () => { currentTypeIndex = (currentTypeIndex === 0) ? reportTypes.length - 1 : currentTypeIndex - 1; updateHalamanLaporan(); });
+repBtnNextType.addEventListener('click', () => { currentTypeIndex = (currentTypeIndex === reportTypes.length - 1) ? 0 : currentTypeIndex + 1; updateHalamanLaporan(); });
+
+document.getElementById('nav-laporan').addEventListener('click', () => updateHalamanLaporan());
+
 async function updateHalamanLaporan() {
-    repMonthDisplay.innerText = reportDate.toLocaleDateString(currentLang === 'id' ? 'id-ID' : 'en-US', { month: 'long', year: 'numeric' });
+    repMonthDisplay.innerText = reportDate.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
     const tipeAktif = reportTypes[currentTypeIndex];
-    
-    repTypeDisplay.innerText = tipeAktif === 'rata-rata' ? (currentLang === 'id' ? 'RATA RATA' : 'AVERAGE') : i18nDictionary[currentLang][tipeAktif === 'pemasukan' ? 'tab_income' : 'tab_expense'];
+    repTypeDisplay.innerText = tipeAktif === 'rata-rata' ? 'Rata Rata' : tipeAktif;
     const uid = auth.currentUser?.uid;
     if (!uid) return;
 
@@ -638,13 +595,13 @@ async function updateHalamanLaporan() {
         if (activeChartInstance) activeChartInstance.destroy();
         if (tipeAktif === 'pemasukan' || tipeAktif === 'pengeluaran') renderDonutChart(kategoriKalkulator, tipeAktif === 'pemasukan' ? totalIncomeValue : totalExpenseValue);
         else renderLineChart(harianKalkulator);
-    } catch (err) {}
+    } catch (err) { console.error(err); }
 }
 
 function renderDonutChart(dataObj, totalUang) { 
     repDataList.innerHTML = ''; const labelData = Object.keys(dataObj); const valueData = Object.values(dataObj); 
     if (labelData.length === 0) { 
-        repDataList.innerHTML = `<p class="text-center text-xs text-slate-400 mt-6">${currentLang === 'id' ? 'Tidak ada data.' : 'No data recorded.'}</p>`; 
+        repDataList.innerHTML = '<p class="text-center text-xs text-slate-400 mt-6">Tidak ada data.</p>'; 
         const ctx = document.getElementById('financialChart').getContext('2d'); 
         activeChartInstance = new Chart(ctx, { type: 'doughnut', data: { labels: ['Kosong'], datasets: [{ data: [1], backgroundColor: ['#e2e8f0'] }] }, options: { plugins: { legend: { display: false } } } }); 
         return; 
@@ -654,10 +611,8 @@ function renderDonutChart(dataObj, totalUang) {
     activeChartInstance = new Chart(ctx, { type: 'doughnut', data: { labels: labelData, datasets: [{ data: valueData, backgroundColor: warnaWarni.slice(0, labelData.length), borderWidth: 2 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, cutout: '60%' } }); 
     labelData.forEach((label, index) => { 
         const nominal = valueData[index]; const persentase = totalUang > 0 ? Math.round((nominal / totalUang) * 100) : 0; const row = document.createElement('div'); 
-        const katMatch = [...kategoriData.expense, ...kategoriData.income].find(k => k.name === label);
-        const labelLokalisasi = katMatch ? i18nDictionary[currentLang][katMatch.key] : label;
-        row.className = "flex justify-between items-center bg-white dark:bg-slate-800 border border-pink-50 dark:border-slate-700 rounded-2xl px-4 py-2.5 shadow-sm text-xs"; 
-        row.innerHTML = `<div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full" style="background-color: ${warnaWarni[index]}"></div><span class="font-bold text-slate-700 dark:text-slate-300">${labelLokalisasi}</span></div><div class="flex gap-4 text-slate-600 dark:text-slate-400"><span class="font-medium">${persentase}%</span><span class="font-bold text-slate-800 dark:text-white">Rp ${nominal.toLocaleString('id-ID')}</span></div>`; 
+        row.className = "flex justify-between items-center bg-white border border-pink-50 rounded-2xl px-4 py-2.5 shadow-sm text-xs"; 
+        row.innerHTML = `<div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full" style="background-color: ${warnaWarni[index]}"></div><span class="font-bold text-slate-700">${label}</span></div><div class="flex gap-4 text-slate-600"><span class="font-medium">${persentase}%</span><span class="font-bold text-slate-800">Rp ${nominal.toLocaleString('id-ID')}</span></div>`; 
         repDataList.appendChild(row); 
     }); 
 }
@@ -665,17 +620,18 @@ function renderDonutChart(dataObj, totalUang) {
 function renderLineChart(harianObj) { 
     repDataList.innerHTML = ''; const arrayTanggalKeys = Object.keys(harianObj); const arrayNilaiValues = Object.values(harianObj); const labelHariSaja = arrayTanggalKeys.map(k => parseInt(k.split('-')[2])); const ctx = document.getElementById('financialChart').getContext('2d'); 
     activeChartInstance = new Chart(ctx, { type: 'line', data: { labels: labelHariSaja, datasets: [{ data: arrayNilaiValues, borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.1)', borderWidth: 2, tension: 0.3, pointRadius: 1, fill: true }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } }, y: { grid: { color: '#f3f4f6' } } } } }); 
-    const headerRow = document.createElement('div'); headerRow.className = "flex justify-between px-3 text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1"; headerRow.innerHTML = `<span>${currentLang === 'id'?'Tanggal':'Date'}</span><span>${currentLang === 'id'?'Total Pengeluaran':'Total Expenses'}</span>`; repDataList.appendChild(headerRow); 
+    const headerRow = document.createElement('div'); headerRow.className = "flex justify-between px-3 text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1"; headerRow.innerHTML = `<span>Tanggal</span><span>Total Pengeluaran</span>`; repDataList.appendChild(headerRow); 
     let adaTransaksi = false; 
     arrayTanggalKeys.forEach((tglFull, index) => { 
         const pengeluaranHariIni = arrayNilaiValues[index]; 
         if (pengeluaranHariIni > 0) { 
-            adaTransaksi = true; const formatTglIndo = new Date(tglFull).toLocaleDateString(currentLang === 'id' ? 'id-ID' : 'en-US', { day: 'numeric', month: 'short', year: 'numeric' }); const row = document.createElement('div'); 
-            row.className = "flex justify-between items-center bg-white dark:bg-slate-800 border border-pink-50 dark:border-slate-700 rounded-xl px-4 py-2 shadow-sm text-xs"; 
-            row.innerHTML = `<span class="dark:text-slate-300">${formatTglIndo}</span><span class="font-bold text-slate-800 dark:text-white">Rp ${pengeluaranHariIni.toLocaleString('id-ID')}</span>`; repDataList.appendChild(row); 
+            adaTransaksi = true; const formatTglIndo = new Date(tglFull).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }); const row = document.createElement('div'); 
+            row.className = "flex justify-between items-center bg-white border border-pink-50 rounded-xl px-4 py-2 shadow-sm text-xs"; 
+            row.innerHTML = `<span>${formatTglIndo}</span><span class="font-bold text-slate-800">Rp ${pengeluaranHariIni.toLocaleString('id-ID')}</span>`; repDataList.appendChild(row); 
         } 
     }); 
-    if (!adaTransaksi) { repDataList.innerHTML += `<p class="text-center text-xs text-slate-400 mt-6">${currentLang === 'id' ? 'Tidak ada catatan pengeluaran bulan ini.' : 'No expense recorded this month.'}</p>`; } 
+    if (!adaTransaksi) { repDataList.innerHTML += '<p class="text-center text-xs text-slate-400 mt-6">Tidak ada catatan pengeluaran bulan ini.</p>'; } 
 }
 
+// Log-out
 document.getElementById('btn-logout').addEventListener('click', () => { signOut(auth).catch(err => alert(err.message)); });
