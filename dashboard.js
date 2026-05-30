@@ -114,7 +114,48 @@ function formatTanggalString(dateObj) { return dateObj.toLocaleDateString('id-ID
 function formatTanggalDatabase(dateObj) { return `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`; }
 
 document.getElementById('btn-prev-date').addEventListener('click', () => { currentDate.setDate(currentDate.getDate() - 1); updateTanggalLayar(); });
-document.getElementById('btn-next-date').addEventListener('click', () => { currentDate.setDate(currentDate.getDate() + 1); updateTanggalLayar(); });
+// ==========================================
+// LOGIKA MANAJEMEN KALENDER HARIAN (FIX LIMIT HARI INI)
+// ==========================================
+function formatTanggalString(dateObj) { 
+    return dateObj.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }); 
+}
+
+function formatTanggalDatabase(dateObj) { 
+    return `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`; 
+}
+
+// Tombol Hari Sebelumnya: Selalu bisa diklik tanpa batasan
+document.getElementById('btn-prev-date').addEventListener('click', () => { 
+    currentDate.setDate(currentDate.getDate() - 1); 
+    updateTanggalLayar(); 
+});
+
+// Tombol Hari Selanjutnya: Dibatasi MAKSIMAL hanya sampai hari ini
+document.getElementById('btn-next-date').addEventListener('click', () => { 
+    const hariIni = new Date();
+    
+    // Set jam, menit, detik ke 00:00:00 agar perbandingan murni fokus pada tanggal, bulan, dan tahun
+    const cloneCurrentDate = new Date(currentDate.getTime());
+    cloneCurrentDate.setDate(cloneCurrentDate.getDate() + 1);
+    cloneCurrentDate.setHours(0, 0, 0, 0);
+    hariIni.setHours(0, 0, 0, 0);
+
+    // Jika tanggal berikutnya melebihi hari ini, batalkan perintah geser
+    if (cloneCurrentDate > hariIni) {
+        alert("Tidak dapat melihat atau mencatat transaksi untuk hari esok!");
+        return;
+    }
+
+    currentDate.setDate(currentDate.getDate() + 1); 
+    updateTanggalLayar(); 
+});
+
+function updateTanggalLayar() { 
+    currentDateDisplay.innerText = formatTanggalString(currentDate); 
+    if(auth.currentUser) loadHistoriHariIni(auth.currentUser.uid); 
+}
+
 function updateTanggalLayar() { currentDateDisplay.innerText = formatTanggalString(currentDate); if(auth.currentUser) loadHistoriHariIni(auth.currentUser.uid); }
 
 // ==========================================
