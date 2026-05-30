@@ -3,6 +3,9 @@ import { auth, db } from "./firebase-config.js";
 import { signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
 import { doc, getDoc, setDoc, collection, addDoc, query, where, getDocs, orderBy, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
 
+// ==========================================
+// KUMPULAN ELEMEN DOM UTAMA
+// ==========================================
 const navItems = { 'transaksi': document.getElementById('nav-transaksi'), 'notifikasi': document.getElementById('nav-notifikasi'), 'laporan': document.getElementById('nav-laporan'), 'akun': document.getElementById('nav-akun') };
 const containers = { 'transaksi': document.getElementById('menu-transaksi-container'), 'notifikasi': document.getElementById('menu-notifikasi-container'), 'laporan': document.getElementById('menu-laporan-container'), 'akun': document.getElementById('menu-akun-container') };
 
@@ -43,8 +46,10 @@ const inputFileAvatar = document.getElementById('input-file-avatar');
 const imgUserAvatar = document.getElementById('img-user-avatar');
 const iconUserDefault = document.getElementById('icon-user-default');
 
-// State Aplikasi
-let currentDate = new Date(); 
+// ==========================================
+// GLOBAL STATE APP
+// ==========================================
+let currentDate = new Date(); // Otomatis mengikat ke penanggalan hari ini secara real-time
 let reportDate = new Date();  
 let currentBalance = 0;
 let currentSavings = 0; 
@@ -110,13 +115,9 @@ btnCancelTransaksi.addEventListener('click', () => {
     editingTransactionId = null;
 });
 
-function formatTanggalString(dateObj) { return dateObj.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }); }
-function formatTanggalDatabase(dateObj) { return `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`; }
-
-document.getElementById('btn-prev-date').addEventListener('click', () => { currentDate.setDate(currentDate.getDate() - 1); updateTanggalLayar(); });
-// ==========================================
-// LOGIKA MANAJEMEN KALENDER HARIAN (FIX LIMIT HARI INI)
-// ==========================================
+// =====================================================================
+// 2. LOGIKA KALENDER HARIAN (FIXED BUG: BATASI MAKSIMAL HARI INI)
+// =====================================================================
 function formatTanggalString(dateObj) { 
     return dateObj.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }); 
 }
@@ -125,30 +126,31 @@ function formatTanggalDatabase(dateObj) {
     return `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`; 
 }
 
-// Tombol Hari Sebelumnya: Selalu bisa diklik tanpa batasan
-document.getElementById('btn-prev-date').addEventListener('click', () => { 
-    currentDate.setDate(currentDate.getDate() - 1); 
-    updateTanggalLayar(); 
+// Tombol Hari Sebelumnya: Selalu bebas diklik
+document.getElementById('btn-prev-date').addEventListener('click', () => {
+    currentDate.setDate(currentDate.getDate() - 1);
+    updateTanggalLayar();
 });
 
-// Tombol Hari Selanjutnya: Dibatasi MAKSIMAL hanya sampai hari ini
-document.getElementById('btn-next-date').addEventListener('click', () => { 
+// Tombol Hari Selanjutnya: Dikunci jika mencoba melewati hari ini
+document.getElementById('btn-next-date').addEventListener('click', () => {
     const hariIni = new Date();
     
-    // Set jam, menit, detik ke 00:00:00 agar perbandingan murni fokus pada tanggal, bulan, dan tahun
-    const cloneCurrentDate = new Date(currentDate.getTime());
-    cloneCurrentDate.setDate(cloneCurrentDate.getDate() + 1);
-    cloneCurrentDate.setHours(0, 0, 0, 0);
+    // Gandakan objek tanggal berjalan untuk simulasi hari esok
+    const cloneNextDate = new Date(currentDate.getTime());
+    cloneNextDate.setDate(cloneNextDate.getDate() + 1);
+    
+    // Netralkan jam untuk komparasi murni (Tanggal, Bulan, Tahun)
+    cloneNextDate.setHours(0, 0, 0, 0);
     hariIni.setHours(0, 0, 0, 0);
 
-    // Jika tanggal berikutnya melebihi hari ini, batalkan perintah geser
-    if (cloneCurrentDate > hariIni) {
+    if (cloneNextDate > hariIni) {
         alert("Tidak dapat melihat atau mencatat transaksi untuk hari esok!");
         return;
     }
 
-    currentDate.setDate(currentDate.getDate() + 1); 
-    updateTanggalLayar(); 
+    currentDate.setDate(currentDate.getDate() + 1);
+    updateTanggalLayar();
 });
 
 function updateTanggalLayar() { 
@@ -156,10 +158,8 @@ function updateTanggalLayar() {
     if(auth.currentUser) loadHistoriHariIni(auth.currentUser.uid); 
 }
 
-function updateTanggalLayar() { currentDateDisplay.innerText = formatTanggalString(currentDate); if(auth.currentUser) loadHistoriHariIni(auth.currentUser.uid); }
-
 // ==========================================
-// 2. REALTIME FIRESTORE SYNC & AUTO RESET
+// 3. REALTIME FIRESTORE SYNC & AUTO RESET
 // ==========================================
 onAuthStateChanged(auth, async (user) => {
     if (user) {
@@ -230,7 +230,7 @@ function proteksiDanSembunyikanKomponenDisiplin() {
 }
 
 // ==========================================
-// 3. LOGIKA FORM MODE DISIPLIN
+// 4. FORM LOGIKA MENU MODE DISIPLIN
 // ==========================================
 toggleModeDisiplin.addEventListener('change', async (e) => {
     disiplinActive = e.target.checked;
@@ -250,6 +250,7 @@ Object.keys(lvlButtons).forEach(lvl => {
 
 function hitungPersenTabungan() {
     if (disiplinActive && btnSimpanDisiplinConfig.classList.contains('hidden')) return; 
+
     let persen = 0;
     if (tipeMenabungLevel === 'mudah') persen = 10;
     else if (tipeMenabungLevel === 'sedang') persen = 20;
@@ -281,7 +282,7 @@ btnSimpanDisiplinConfig.addEventListener('click', async () => {
 });
 
 // ==========================================
-// SUB FORM ATURAN KATEGORI
+// SUB ATURAN KATEGORI DISIPLIN
 // ==========================================
 btnTambahAturan.addEventListener('click', () => { subDisiplinUtama.classList.add('hidden'); subDisiplinRulesPicker.classList.remove('hidden'); renderKategoriRulesSelection(); });
 btnCancelRule.addEventListener('click', () => { subDisiplinRulesPicker.classList.add('hidden'); subDisiplinUtama.classList.remove('hidden'); ruleSelectedKategori = ''; });
@@ -333,7 +334,7 @@ async function loadRulesFromCloud(uid) {
 }
 
 // ==========================================
-// 4. PEMASUKAN / PENGELUARAN UTAMA
+// 5. MANAJEMEN INPUT FORM UTAMA
 // ==========================================
 function setTabFormType(type) {
     selectedType = type;
@@ -365,7 +366,7 @@ function renderKategori() {
 }
 
 // ==========================================
-// 5. RENDERING HISTORI DENGAN FITUR SWIPE
+// 6. SWIPE GESTURE & LIST HISTORI
 // ==========================================
 async function loadHistoriHariIni(uid) {
     historiList.innerHTML = '';
@@ -439,7 +440,7 @@ async function loadHistoriHariIni(uid) {
 }
 
 // =====================================================================
-// 6. ACTION SUBMIT TRANSACTION (FIXED BUG INTERCEPTOR AKUMULASI)
+// 7. INTERCEPTOR & EKSEKUSI DATA SUBMIT
 // =====================================================================
 btnSubmitTransaksi.addEventListener('click', async () => {
     const amount = parseInt(transactionAmount.value);
@@ -466,15 +467,14 @@ btnSubmitTransaksi.addEventListener('click', async () => {
             if (selectedType === 'expense') {
                 if (amount > currentBalance) { alert("Saldo tidak mencukupi."); return; }
                 
-                // FIX BUG UTAMA: Validasi Hitung Akumulasi Riwayat Pengeluaran Realtime dari Server
+                // DETEKSI AKUMULASI BATASAN PENGELUARAN MODE DISIPLIN CLOUD
                 if (disiplinActive) {
                     const rule = aturanBatasKategori.find(r => r.kategori === selectedKategori);
                     if (rule) {
                         let totalPengeluaranTercatat = 0;
-                        const tglFormatLokal = formatTanggalDatabase(currentDate); // Format: YYYY-MM-DD
-                        const bulanFormatLokal = tglFormatLokal.substring(0, 7);   // Format: YYYY-MM
+                        const tglFormatLokal = formatTanggalDatabase(currentDate); 
+                        const bulanFormatLokal = tglFormatLokal.substring(0, 7);   
                         
-                        // Tarik seluruh list transaksi dari server cloud untuk dihitung akumulasinya
                         const qCek = query(collection(db, "transactions"), where("uid", "==", currentUser.uid), where("kategori", "==", selectedKategori));
                         const snapCek = await getDocs(qCek);
                         
@@ -487,11 +487,8 @@ btnSubmitTransaksi.addEventListener('click', async () => {
                             }
                         });
 
-                        // Cek gabungan pengeluaran lalu + input baru apakah mendobrak batas
                         if ((totalPengeluaranTercatat + amount) > rule.limit) {
-                            const sisaKuotaBatas = rule.limit - totalPengeluaranTercatat;
                             const textPeriode = rule.periode === 'hari' ? 'Hari Ini' : 'Bulan Ini';
-                            
                             const lanjut = confirm(`[PERINGATAN DISIPLIN TANGGALTUA]\n\nAkumulasi pengeluaran Anda untuk Kategori "${selectedKategori}" pada ${textPeriode} akan melebihi batasan maksimal!\n\n• Pengeluaran Lalu: Rp ${totalPengeluaranTercatat.toLocaleString('id-ID')}\n• Input Baru: Rp ${amount.toLocaleString('id-ID')}\n• Total Gabungan: Rp ${(totalPengeluaranTercatat + amount).toLocaleString('id-ID')}\n• Batas Maksimal: Rp ${rule.limit.toLocaleString('id-ID')}\n\nTetap ingin melanjutkan transaksi ini?`);
                             if (!lanjut) return;
                         }
@@ -518,7 +515,7 @@ btnSubmitTransaksi.addEventListener('click', async () => {
 });
 
 // ==========================================
-// 7. PROFILE & AVATAR EDIT
+// 8. PROFILE & AVATAR MANAJEMEN
 // ==========================================
 inputFileAvatar.addEventListener('change', (e) => {
     const file = e.target.files[0];
@@ -538,7 +535,7 @@ document.getElementById('btn-edit-name').addEventListener('click', async () => {
 });
 
 // ==========================================
-// 8. MENU REPORT LAPORAN (CHART.JS LOGIC)
+// 9. GRAFIK KONTEN LAPORAN (CHART.JS)
 // ==========================================
 const repBtnPrevMonth = document.getElementById('rep-btn-prev-month');
 const repBtnNextMonth = document.getElementById('rep-btn-next-month');
