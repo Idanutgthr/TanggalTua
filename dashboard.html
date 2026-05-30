@@ -3,208 +3,220 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TanggalTua - Dashboard</title>
+    <title>TanggalTua - Dashboard Utama</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        // Konfigurasi Tailwind untuk mendukung class dark mode
-        tailwind.config = { darkMode: 'class' }
-    </script>
-    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2 family=Poppins:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
-        body { font-family: 'Poppins', sans-serif; }
-        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-        .custom-scroll::-webkit-scrollbar { width: 4px; }
-        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: #fbcfe8; border-radius: 10px; }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #fef08a 0%, #fbcfe8 100%);
+        }
+        input::-webkit-outer-spin-button, 
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none; 
+            margin: 0;
+        }
+        .custom-scroll::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: #fbcfe8;
+            border-radius: 10px;
+        }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-4 bg-gradient-to-135 from-yellow-200 to-pink-200 dark:from-slate-900 dark:to-slate-800 transition-colors duration-300">
+<body class="min-h-screen flex items-center justify-center p-4">
 
-    <div class="bg-white dark:bg-slate-900 rounded-[40px] shadow-2xl p-6 max-w-sm w-full h-[780px] flex flex-col justify-between border border-pink-100 dark:border-slate-800 relative overflow-hidden transition-colors duration-300">
+    <div class="bg-white rounded-[40px] shadow-2xl p-6 max-w-sm w-full h-[780px] flex flex-col justify-between border border-pink-100 relative overflow-hidden">
         
         <div class="flex-grow flex flex-col overflow-y-auto custom-scroll pb-4">
             
-            <div class="bg-[#fbcfe8] bg-opacity-70 dark:bg-slate-800 rounded-3xl p-4 mb-4 text-center border border-pink-200/50 dark:border-slate-700 relative overflow-hidden">
-                <p data-i18n="my_balance" class="text-xs text-slate-500 dark:text-slate-400 font-medium tracking-wide">Saldo Saya</p>
-                <h3 id="balance-display" class="text-2xl font-black text-slate-800 dark:text-white mt-0.5 tracking-tight">Rp 0</h3>
-                <i class="fa-solid fa-wallet text-5xl absolute -right-2 -bottom-2 opacity-10 text-slate-900 dark:text-white rotate-12"></i>
+            <!-- KARTU SALDO UTAMA -->
+            <div class="bg-[#fbcfe8] bg-opacity-70 rounded-3xl p-4 mb-4 text-center border border-pink-200/50 relative overflow-hidden">
+                <p class="text-xs text-slate-500 font-medium tracking-wide">My Balance</p>
+                <h3 id="balance-display" class="text-2xl font-black text-slate-800 mt-0.5 tracking-tight">Rp 0</h3>
+                <i class="fa-solid fa-wallet text-5xl absolute -right-2 -bottom-2 opacity-10 text-slate-900 rotate-12"></i>
             </div>
 
+            <!-- MENU 1: TRANSAKSI -->
             <div id="menu-transaksi-container" class="space-y-4 flex-grow flex flex-col">
                 <div id="sub-layar-histori" class="space-y-4 flex-grow flex flex-col">
-                    <div data-i18n="histori" class="bg-[#fbcfe8] bg-opacity-50 dark:bg-slate-800 dark:text-slate-200 rounded-full py-2 text-center font-bold text-sm text-slate-700 shadow-sm uppercase tracking-widest border border-pink-200/40 dark:border-slate-700">Histori</div>
-                    <div class="flex justify-between items-center bg-white dark:bg-slate-800 border border-pink-100 dark:border-slate-700 rounded-full px-5 py-2.5 text-sm text-slate-700 dark:text-slate-300 shadow-sm">
-                        <button id="btn-prev-date" class="text-pink-400"><i class="fa-solid fa-chevron-left"></i></button>
-                        <span id="current-date-display" class="font-bold tracking-tight"></span>
-                        <button id="btn-next-date" class="text-pink-400"><i class="fa-solid fa-chevron-right"></i></button>
+                    <div class="bg-[#fbcfe8] bg-opacity-50 rounded-full py-2 text-center font-bold text-sm text-slate-700 shadow-sm uppercase tracking-widest">Histori</div>
+                    <div class="flex justify-between items-center bg-white border border-pink-100 rounded-full px-5 py-2.5 text-sm text-slate-700 shadow-sm">
+                        <button id="btn-prev-date" class="text-pink-400 hover:scale-120 transition"><i class="fa-solid fa-chevron-left"></i></button>
+                        <span id="current-date-display" class="font-bold tracking-tight">28 Mei 2026</span>
+                        <button id="btn-next-date" class="text-pink-400 hover:scale-120 transition"><i class="fa-solid fa-chevron-right"></i></button>
                     </div>
-                    <div id="histori-list" class="space-y-2 flex-grow overflow-y-auto custom-scroll max-h-[340px] pr-1"></div>
-                    <button id="btn-buka-input" data-i18n="btn_transaksi" class="w-full bg-[#fbcfe8] hover:bg-[#f9a8d4] dark:bg-pink-600 dark:hover:bg-pink-700 dark:text-white text-slate-800 font-bold py-3.5 rounded-full text-sm tracking-wide shadow-md transition mt-auto">Transaksi</button>
+                    <div id="histori-list" class="space-y-2 flex-grow overflow-y-auto custom-scroll max-h-[340px] pr-1">
+                        <p class="text-center text-xs text-slate-400 mt-16 font-medium">Memuat data histori...</p>
+                    </div>
+                    <button id="btn-buka-input" class="w-full bg-[#fbcfe8] hover:bg-[#f9a8d4] text-slate-800 font-bold py-3.5 rounded-full text-sm tracking-wide shadow-md transition mt-auto">Transaksi</button>
                 </div>
 
                 <div id="sub-layar-input" class="space-y-4 hidden flex-grow flex flex-col animate-fadeIn">
-                    <div class="bg-[#fbcfe8] bg-opacity-40 dark:bg-slate-800 rounded-full p-1 flex border border-pink-200/30 dark:border-slate-700 shadow-inner">
-                        <button id="tab-pemasukan" type="button" data-i18n="tab_income" class="flex-1 text-center py-2 text-xs font-semibold rounded-full text-slate-500 transition duration-200">Pemasukan</button>
-                        <button id="tab-pengeluaran" type="button" data-i18n="tab_expense" class="flex-1 bg-white dark:bg-slate-700 text-center py-2 text-xs font-bold rounded-full text-slate-800 dark:text-white shadow-sm transition duration-200">Pengeluaran</button>
+                    <div class="bg-[#fbcfe8] bg-opacity-40 rounded-full p-1 flex border border-pink-200/30 shadow-inner">
+                        <button id="tab-pemasukan" type="button" class="flex-1 text-center py-2 text-xs font-semibold rounded-full text-slate-500 transition duration-200">Pemasukan</button>
+                        <button id="tab-pengeluaran" type="button" class="flex-1 bg-white text-center py-2 text-xs font-bold rounded-full text-slate-800 shadow-sm transition duration-200">Pengeluaran</button>
                     </div>
                     <div class="relative">
-                        <input type="number" id="transaction-amount" data-i18n-holder="input_nominal_holder" placeholder="Masukkan Nominal..." class="w-full px-6 py-3.5 border-2 border-[#fbcfe8] dark:border-slate-700 rounded-full text-base font-bold text-center focus:outline-none bg-white dark:bg-slate-800 text-slate-800 dark:text-white shadow-sm">
+                        <input type="number" id="transaction-amount" placeholder="Masukkan Nominal..." class="w-full px-6 py-3.5 border-2 border-[#fbcfe8] rounded-full text-base font-bold text-center focus:outline-none bg-white text-slate-800 shadow-sm">
                     </div>
                     <div id="kategori-grid" class="grid grid-cols-3 gap-y-4 gap-x-2 py-2 text-center overflow-y-auto custom-scroll max-h-[260px]"></div>
                     <div class="flex gap-3 mt-auto pt-2">
-                        <button id="btn-cancel-transaksi" type="button" data-i18n="cancel" class="flex-1 bg-white dark:bg-slate-800 border-2 border-pink-100 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-semibold py-3 rounded-full text-sm">Cancel</button>
-                        <button id="btn-submit-transaksi" type="button" data-i18n="submit" class="flex-1 bg-[#fbcfe8] dark:bg-pink-600 hover:bg-[#f9a8d4] text-slate-800 dark:text-white font-bold py-3 rounded-full text-sm shadow-md transition">Submit</button>
+                        <button id="btn-cancel-transaksi" type="button" class="flex-1 bg-white border-2 border-pink-100 text-slate-700 font-semibold py-3 rounded-full text-sm">Cancel</button>
+                        <button id="btn-submit-transaksi" type="button" class="flex-1 bg-[#fbcfe8] hover:bg-[#f9a8d4] text-slate-800 font-bold py-3 rounded-full text-sm shadow-md transition">Submit</button>
                     </div>
                 </div>
             </div>
 
+            <!-- MENU 2: NOTIFIKASI (MODE DISIPLIN ATURAN BARU) -->
             <div id="menu-notifikasi-container" class="space-y-4 hidden flex-col flex-grow animate-fadeIn">
                 <div id="sub-disiplin-utama" class="space-y-4 w-full flex flex-col flex-grow">
-                    <div class="bg-[#fbcfe8] bg-opacity-70 dark:bg-slate-800 rounded-3xl p-4 flex justify-between items-center border border-pink-200 dark:border-slate-700 shadow-sm">
-                        <span data-i18n="mode_disiplin" class="font-bold text-slate-800 dark:text-slate-200 text-sm">Mode Disiplin</span>
+                    <div class="bg-[#fbcfe8] bg-opacity-70 rounded-3xl p-4 flex justify-between items-center border border-pink-200 shadow-sm">
+                        <span class="font-bold text-slate-800 text-sm">Mode Disiplin</span>
                         <label class="relative inline-flex items-center cursor-pointer">
                             <input type="checkbox" id="toggle-mode-disiplin" class="sr-only peer">
-                            <div class="w-11 h-6 bg-slate-200 dark:bg-slate-700 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
+                            <div class="w-11 h-6 bg-slate-200 rounded-full peer peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
                         </label>
                     </div>
 
+                    <!-- KONTEN KONFIGURASI (BAGIAN NOMINAL AWAL TELAH DIHAPUS) -->
                     <div id="box-konfigurasi-disiplin" class="hidden space-y-4 flex-grow flex flex-col">
-                        <div class="grid grid-cols-4 gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl text-[10px] font-bold border border-slate-200 dark:border-slate-700">
-                            <button id="lvl-kustom" data-i18n="lvl_kustom" class="py-2 rounded-lg text-slate-600 dark:text-slate-400 bg-white dark:bg-slate-700 shadow-sm">Kustom</button>
-                            <button id="lvl-sulit" data-i18n="lvl_sulit" class="py-2 rounded-lg text-slate-600 dark:text-slate-400">Sulit</button>
-                            <button id="lvl-sedang" data-i18n="lvl_sedang" class="py-2 rounded-lg text-slate-600 dark:text-slate-400">Sedang</button>
-                            <button id="lvl-mudah" data-i18n="lvl_mudah" class="py-2 rounded-lg text-slate-600 dark:text-slate-400">Mudah</button>
+                        <!-- Tingkatan Menabung -->
+                        <div class="grid grid-cols-4 gap-1 bg-slate-100 p-1 rounded-xl text-[10px] font-bold border border-slate-200">
+                            <button id="lvl-kustom" class="py-2 rounded-lg text-slate-600 bg-white shadow-sm">Kustom</button>
+                            <button id="lvl-sulit" class="py-2 rounded-lg text-slate-600">Sulit</button>
+                            <button id="lvl-sedang" class="py-2 rounded-lg text-slate-600">Sedang</button>
+                            <button id="lvl-mudah" class="py-2 rounded-lg text-slate-600">Mudah</button>
                         </div>
 
-                        <div class="flex justify-between items-center bg-[#fbcfe8] bg-opacity-30 dark:bg-slate-800 p-3 rounded-xl border border-pink-100 dark:border-slate-700">
-                            <span id="label-tabungan-persen" class="text-xs font-bold text-slate-700 dark:text-slate-300">Tabungan</span>
-                            <input type="number" id="input-nilai-tabungan" class="w-1/2 bg-transparent text-right font-black text-xs text-slate-800 dark:text-white focus:outline-none" placeholder="Rp. 0">
+                        <!-- Info Output Persentase Tabungan Berdasarkan Saldo Saat Ini -->
+                        <div class="flex justify-between items-center bg-[#fbcfe8] bg-opacity-30 p-3 rounded-xl border border-pink-100">
+                            <span id="label-tabungan-persen" class="text-xs font-bold text-slate-700">Tabungan (10%)</span>
+                            <input type="number" id="input-nilai-tabungan" class="w-1/2 bg-transparent text-right font-black text-xs text-slate-800 focus:outline-none" placeholder="Rp. 0">
                         </div>
 
-                        <button id="btn-tambah-aturan" data-i18n="btn_add_rule" class="w-full bg-pink-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold py-2.5 rounded-full text-xs shadow-sm border border-pink-200/50 dark:border-slate-700">Tambah Aturan</button>
+                        <button id="btn-tambah-aturan" class="w-full bg-pink-100 hover:bg-pink-200 text-slate-700 font-bold py-2.5 rounded-full text-xs transition shadow-sm border border-pink-200/50">Tambah Aturan</button>
                         <div id="rules-list-container" class="space-y-2 flex-grow overflow-y-auto custom-scroll max-h-[180px] pr-1"></div>
-                        <button id="btn-simpan-disiplin-config" data-i18n="save" class="w-full bg-[#fbcfe8] dark:bg-pink-600 dark:text-white hover:bg-[#f9a8d4] text-slate-800 font-bold py-3 rounded-full text-sm shadow-md transition mt-auto">Simpan</button>
+                        <button id="btn-simpan-disiplin-config" class="w-full bg-[#fbcfe8] hover:bg-[#f9a8d4] text-slate-800 font-bold py-3 rounded-full text-sm shadow-md transition mt-auto">Simpan</button>
                     </div>
                 </div>
 
+                <!-- SUB-LAYAR 2B: PICKER ATURAN KATEGORI -->
                 <div id="sub-disiplin-rules-picker" class="space-y-4 hidden w-full flex flex-col flex-grow animate-fadeIn">
-                    <div data-i18n="pick_category" class="bg-[#fbcfe8] bg-opacity-50 dark:bg-slate-800 dark:text-slate-200 rounded-full py-2 text-center font-bold text-xs text-slate-700 uppercase tracking-wider">Pilih Kategori</div>
+                    <div class="bg-[#fbcfe8] bg-opacity-50 rounded-full py-2 text-center font-bold text-xs text-slate-700 uppercase tracking-wider">Pilih Kategori Pengeluaran</div>
                     <div id="grid-kategori-rules" class="grid grid-cols-3 gap-2 py-1 text-center max-h-[220px] overflow-y-auto custom-scroll"></div>
                     
-                    <div class="bg-[#fbcfe8] bg-opacity-40 dark:bg-slate-800 rounded-full p-1 flex border border-pink-200/20 dark:border-slate-700">
-                        <button id="tab-rule-perhari" data-i18n="rule_daily" class="flex-1 bg-white dark:bg-slate-700 text-center py-1.5 text-xs font-bold rounded-full text-slate-800 dark:text-white shadow-sm">Perhari</button>
-                        <button id="tab-rule-perbulan" data-i18n="rule_monthly" class="flex-1 text-center py-1.5 text-xs font-semibold rounded-full text-slate-500">Perbulan</button>
+                    <div class="bg-[#fbcfe8] bg-opacity-40 rounded-full p-1 flex border border-pink-200/20">
+                        <button id="tab-rule-perhari" class="flex-1 bg-white text-center py-1.5 text-xs font-bold rounded-full text-slate-800 shadow-sm">Perhari</button>
+                        <button id="tab-rule-perbulan" class="flex-1 text-center py-1.5 text-xs font-semibold rounded-full text-slate-500">Perbulan</button>
                     </div>
 
-                    <div class="flex justify-between items-center bg-[#fbcfe8] bg-opacity-30 dark:bg-slate-800 p-3 rounded-xl border border-pink-100 dark:border-slate-700">
-                        <span data-i18n="max_nominal" class="text-xs font-bold text-slate-700 dark:text-slate-300">Nominal Maksimal</span>
-                        <input type="number" id="input-nominal-maksimal-rule" class="w-1/2 bg-white dark:bg-slate-700 border border-pink-100 dark:border-slate-600 rounded-lg px-2 py-1.5 text-center font-bold text-xs text-slate-800 dark:text-white focus:outline-none" placeholder="Rp. 50.000">
+                    <div class="flex justify-between items-center bg-[#fbcfe8] bg-opacity-30 p-3 rounded-xl border border-pink-100">
+                        <span class="text-xs font-bold text-slate-700">Nominal Maksimal</span>
+                        <input type="number" id="input-nominal-maksimal-rule" class="w-1/2 bg-white border border-pink-100 rounded-lg px-2 py-1.5 text-center font-bold text-xs text-slate-800 focus:outline-none" placeholder="Rp. 50.000">
                     </div>
 
                     <div class="flex gap-3 mt-auto pt-2">
-                        <button id="btn-cancel-rule" data-i18n="cancel" class="flex-1 bg-white dark:bg-slate-800 border border-pink-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-semibold py-2.5 rounded-full text-xs">Batal</button>
-                        <button id="btn-save-rule" data-i18n="save" class="flex-1 bg-[#fbcfe8] dark:bg-pink-600 text-slate-800 dark:text-white font-bold py-2.5 rounded-full text-xs shadow-sm">Simpan</button>
+                        <button id="btn-cancel-rule" class="flex-1 bg-white border border-pink-200 text-slate-700 font-semibold py-2.5 rounded-full text-xs">Batal</button>
+                        <button id="btn-save-rule" class="flex-1 bg-[#fbcfe8] text-slate-800 font-bold py-2.5 rounded-full text-xs shadow-sm">Simpan</button>
                     </div>
                 </div>
             </div>
 
+            <!-- MENU 3: LAPORAN -->
             <div id="menu-laporan-container" class="space-y-4 hidden flex-col flex-grow animate-fadeIn">
-                <div class="flex justify-between items-center bg-white dark:bg-slate-800 border border-pink-100 dark:border-slate-700 rounded-full px-5 py-2.5 text-sm text-slate-700 dark:text-slate-300 shadow-sm">
+                <div class="flex justify-between items-center bg-white border border-pink-100 rounded-full px-5 py-2.5 text-sm text-slate-700 shadow-sm">
                     <button id="rep-btn-prev-month" class="text-pink-400"><i class="fa-solid fa-chevron-left"></i></button>
-                    <span id="rep-month-display" class="font-bold"></span>
+                    <span id="rep-month-display" class="font-bold">Mei 2026</span>
                     <button id="rep-btn-next-month" class="text-pink-400"><i class="fa-solid fa-chevron-right"></i></button>
                 </div>
 
-                <div class="bg-[#fbcfe8] bg-opacity-40 dark:bg-slate-800 rounded-2xl p-2.5 grid grid-cols-3 gap-1.5 text-center text-[10px] border border-pink-200/30 dark:border-slate-700 shadow-inner">
-                    <div class="bg-white dark:bg-slate-700 rounded-xl p-2 shadow-sm flex flex-col justify-center">
-                        <p data-i18n="tab_income" class="text-slate-400 dark:text-slate-300 font-bold uppercase text-[9px]">Pemasukan</p>
+                <div class="bg-[#fbcfe8] bg-opacity-40 rounded-2xl p-2.5 grid grid-cols-3 gap-1.5 text-center text-[10px] border border-pink-200/30 shadow-inner">
+                    <div class="bg-white rounded-xl p-2 shadow-sm flex flex-col justify-center">
+                        <p class="text-slate-400 font-bold uppercase text-[9px]">Pemasukan</p>
                         <p id="rep-total-income" class="font-bold text-green-600 mt-0.5 truncate">Rp 0</p>
                     </div>
-                    <div class="bg-white dark:bg-slate-700 rounded-xl p-2 shadow-sm border border-pink-300 dark:border-pink-600 flex flex-col justify-center">
-                        <p data-i18n="saving" class="text-slate-400 dark:text-slate-300 font-bold uppercase text-[9px]">Tabungan</p>
+                    <div class="bg-white rounded-xl p-2 shadow-sm border border-pink-300 flex flex-col justify-center">
+                        <p class="text-slate-400 font-bold uppercase text-[9px]">Tabungan</p>
                         <p id="rep-total-saving" class="font-bold text-pink-500 mt-0.5 truncate">Rp 0</p>
                     </div>
-                    <div class="bg-white dark:bg-slate-700 rounded-xl p-2 shadow-sm flex flex-col justify-center">
-                        <p data-i18n="tab_expense" class="text-slate-400 dark:text-slate-300 font-bold uppercase text-[9px]">Pengeluaran</p>
-                        <p id="rep-total-expense" class="font-bold text-slate-700 dark:text-white mt-0.5 truncate">Rp 0</p>
+                    <div class="bg-white rounded-xl p-2 shadow-sm flex flex-col justify-center">
+                        <p class="text-slate-400 font-bold uppercase text-[9px]">Pengeluaran</p>
+                        <p id="rep-total-expense" class="font-bold text-slate-700 mt-0.5 truncate">Rp 0</p>
                     </div>
                 </div>
 
-                <div class="flex justify-between items-center bg-white dark:bg-slate-800 border border-pink-100 dark:border-slate-700 rounded-full px-4 py-2 text-xs font-bold text-slate-700 dark:text-slate-300 shadow-sm">
+                <div class="flex justify-between items-center bg-white border border-pink-100 rounded-full px-4 py-2 text-xs font-bold text-slate-700 shadow-sm">
                     <button id="rep-btn-prev-type" class="text-pink-400"><i class="fa-solid fa-chevron-left"></i></button>
-                    <span id="rep-type-display" class="uppercase tracking-widest text-slate-800 dark:text-white text-[11px]"></span>
+                    <span id="rep-type-display" class="uppercase tracking-widest text-slate-800 text-[11px]">Pengeluaran</span>
                     <button id="rep-btn-next-type" class="text-pink-400"><i class="fa-solid fa-chevron-right"></i></button>
                 </div>
 
-                <div class="bg-[#fbcfe8] bg-opacity-20 rounded-[32px] p-4 flex items-center justify-center min-h-[210px] max-h-[210px] relative border border-pink-100/40 dark:border-slate-700 shadow-inner">
+                <div class="bg-[#fbcfe8] bg-opacity-20 rounded-[32px] p-4 flex items-center justify-center min-h-[210px] max-h-[210px] relative border border-pink-100/40 shadow-inner">
                     <canvas id="financialChart" class="max-w-full max-h-[190px]"></canvas>
                 </div>
                 <div id="rep-data-list" class="space-y-2 flex-grow overflow-y-auto custom-scroll max-h-[170px] pr-1"></div>
             </div>
 
+            <!-- MENU 4: AKUN -->
             <div id="menu-akun-container" class="space-y-4 hidden flex-col items-center pt-4 text-center animate-fadeIn">
                 <div class="relative w-24 h-24 mx-auto">
-                    <div class="w-24 h-24 rounded-full bg-[#fbcfe8] bg-opacity-60 flex items-center justify-center shadow-md overflow-hidden border-2 border-white dark:border-slate-700">
+                    <div class="w-24 h-24 rounded-full bg-[#fbcfe8] bg-opacity-60 flex items-center justify-center shadow-md overflow-hidden border-2 border-white">
                         <img id="img-user-avatar" class="hidden w-full h-full object-cover" src="">
-                        <i id="icon-user-default" class="fa-solid fa-user text-4xl text-slate-700 dark:text-slate-300"></i>
+                        <i id="icon-user-default" class="fa-solid fa-user text-4xl text-slate-700"></i>
                     </div>
-                    <label for="input-file-avatar" class="absolute bottom-0 right-0 w-8 h-8 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-full flex items-center justify-center cursor-pointer shadow-md hover:scale-110 transition">
-                        <i class="fa-solid fa-camera text-xs text-slate-600 dark:text-slate-300"></i>
+                    <label for="input-file-avatar" class="absolute bottom-0 right-0 w-8 h-8 bg-white border border-slate-200 rounded-full flex items-center justify-center cursor-pointer shadow-md hover:scale-110 transition">
+                        <i class="fa-solid fa-camera text-xs text-slate-600"></i>
                         <input type="file" id="input-file-avatar" class="hidden" accept="image/*">
                     </label>
                 </div>
 
                 <div class="flex flex-col items-center w-full">
                     <div class="flex items-center gap-2 justify-center">
-                        <h4 id="user-display-name" class="font-bold text-slate-800 dark:text-white text-lg tracking-tight"></h4>
+                        <h4 id="user-display-name" class="font-bold text-slate-800 text-lg tracking-tight">Memuat Nama...</h4>
                         <button id="btn-edit-name" class="text-slate-400 hover:text-pink-500 text-sm transition"><i class="fa-solid fa-pencil"></i></button>
                     </div>
                     <p id="user-email" class="text-xs text-slate-400 font-medium"></p>
                 </div>
 
-                <div class="w-full bg-slate-50/80 dark:bg-slate-800 border border-pink-100 dark:border-slate-700 rounded-2xl p-4 text-left shadow-sm">
+                <div class="w-full bg-slate-50/80 border border-pink-100 rounded-2xl p-4 text-left shadow-sm">
                     <div class="flex items-center gap-2 text-pink-500 mb-1">
                         <i class="fa-solid fa-piggy-bank text-sm"></i>
-                        <span data-i18n="my_savings" class="text-[11px] font-bold tracking-wider uppercase">Tabungan Saya</span>
+                        <span class="text-[11px] font-bold tracking-wider uppercase">Tabungan Saya</span>
                     </div>
-                    <h3 id="profile-saving-display" class="text-xl font-black text-slate-800 dark:text-white">Rp 0</h3>
+                    <h3 id="profile-saving-display" class="text-xl font-black text-slate-800">Rp 0</h3>
                 </div>
 
-                <div class="w-full space-y-2 relative">
-                    <div class="w-full relative">
-                        <button id="btn-dropdown-bahasa" class="w-full bg-pink-50/60 dark:bg-slate-800 border border-pink-100 dark:border-slate-700 px-4 py-3 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-300 flex justify-between items-center shadow-sm">
-                            <span data-i18n="lang_label">Bahasa</span>
-                            <span class="text-pink-400 dark:text-pink-500 font-normal text-[11px]" id="current-lang-text">Bahasa Indonesia <i class="fa-solid fa-check text-[10px]"></i></span>
+                <div class="w-full space-y-2">
+                    <div class="w-full">
+                        <button class="w-full bg-pink-50/60 border border-pink-100 px-4 py-3 rounded-xl text-xs font-bold text-slate-700 flex justify-between items-center shadow-sm">
+                            <span>Tabungan</span><i class="fa-solid fa-chevron-right text-pink-300 text-[10px]"></i>
                         </button>
-                        <div id="box-select-bahasa" class="hidden absolute left-0 right-0 mt-1 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-xl shadow-lg z-50 overflow-hidden text-xs text-left">
-                            <button id="opt-lang-id" class="w-full px-4 py-3 text-slate-700 dark:text-slate-300 hover:bg-pink-50 dark:hover:bg-slate-700 font-medium flex justify-between"><span>Bahasa Indonesia</span><i class="fa-solid fa-check text-pink-500 id-check"></i></button>
-                            <button id="opt-lang-en" class="w-full px-4 py-3 text-slate-700 dark:text-slate-300 hover:bg-pink-50 dark:hover:bg-slate-700 font-medium flex justify-between"><span>English</span><i class="fa-solid fa-check text-pink-500 en-check hidden"></i></button>
-                        </div>
                     </div>
-
-                    <div class="w-full relative">
-                        <button id="btn-dropdown-tema" class="w-full bg-pink-50/60 dark:bg-slate-800 border border-pink-100 dark:border-slate-700 px-4 py-3 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-300 flex justify-between items-center shadow-sm">
-                            <span data-i18n="theme_label">Mode Layar</span>
-                            <span class="text-pink-400 dark:text-pink-500 font-normal text-[11px]" id="current-theme-text">Terang <i class="fa-solid fa-check text-[10px]"></i></span>
+                    <div class="w-full">
+                        <button class="w-full bg-pink-50/60 border border-pink-100 px-4 py-3 rounded-xl text-xs font-bold text-slate-700 flex justify-between items-center shadow-sm">
+                            <span>Bahasa</span><span class="text-pink-400 font-normal text-[11px]">Bahasa Indonesia <i class="fa-solid fa-check text-[10px]"></i></span>
                         </button>
-                        <div id="box-select-tema" class="hidden absolute left-0 right-0 mt-1 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-xl shadow-lg z-50 overflow-hidden text-xs text-left">
-                            <button id="opt-theme-light" class="w-full px-4 py-3 text-slate-700 dark:text-slate-300 hover:bg-pink-50 dark:hover:bg-slate-700 font-medium flex justify-between"><span>Terang / Light</span><i class="fa-solid fa-check text-pink-500 light-check"></i></button>
-                            <button id="opt-theme-dark" class="w-full px-4 py-3 text-slate-700 dark:text-slate-300 hover:bg-pink-50 dark:hover:bg-slate-700 font-medium flex justify-between"><span>Gelap / Dark</span><i class="fa-solid fa-check text-pink-500 dark-check hidden"></i></button>
-                        </div>
+                    </div>
+                    <div class="w-full">
+                        <button class="w-full bg-pink-50/60 border border-pink-100 px-4 py-3 rounded-xl text-xs font-bold text-slate-700 flex justify-between items-center shadow-sm">
+                            <span>Mode layar</span><span class="text-pink-400 font-normal text-[11px]">Terang <i class="fa-solid fa-check text-[10px]"></i></span>
+                        </button>
                     </div>
                 </div>
 
-                <div class="w-full border-t border-slate-100 dark:border-slate-800 pt-2">
-                    <button id="btn-logout" class="w-full bg-rose-50/50 dark:bg-slate-800 border border-rose-100 dark:border-slate-700 text-rose-500 font-bold py-3 rounded-full text-xs hover:bg-rose-100/50 transition flex items-center justify-center gap-2">
+                <div class="w-full border-t border-slate-100 pt-2">
+                    <button id="btn-logout" class="w-full bg-rose-50/50 border border-rose-100 text-rose-500 font-bold py-3 rounded-full text-xs hover:bg-rose-100/50 transition flex items-center justify-center gap-2">
                         <i class="fa-solid fa-right-from-bracket"></i> Log out
                     </button>
                 </div>
@@ -212,8 +224,9 @@
 
         </div>
 
-        <div class="border-t border-pink-100/60 pt-3 mt-auto flex justify-around items-center bg-white/80 dark:bg-slate-900 backdrop-blur-sm">
-            <button id="nav-transaksi" type="button" class="nav-item w-12 h-12 rounded-full bg-white dark:bg-slate-800 flex items-center justify-center shadow-md border border-pink-100 dark:border-slate-700 text-pink-500 text-base transition transform scale-110"><i class="fa-solid fa-pencil"></i></button>
+        <!-- BOTTOM NAV BAR -->
+        <div class="border-t border-pink-100/60 pt-3 mt-auto flex justify-around items-center bg-white/80 backdrop-blur-sm">
+            <button id="nav-transaksi" type="button" class="nav-item w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-md border border-pink-100 text-pink-500 text-base transition transform scale-110"><i class="fa-solid fa-pencil"></i></button>
             <button id="nav-notifikasi" type="button" class="nav-item w-10 h-10 text-slate-400 hover:text-pink-400 text-base transition"><i class="fa-solid fa-bell"></i></button>
             <button id="nav-laporan" type="button" class="nav-item w-10 h-10 text-slate-400 hover:text-pink-400 text-base transition"><i class="fa-solid fa-chart-simple"></i></button>
             <button id="nav-akun" type="button" class="nav-item w-10 h-10 text-slate-400 hover:text-pink-400 text-base transition"><i class="fa-solid fa-circle-user"></i></button>
