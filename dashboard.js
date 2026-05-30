@@ -20,7 +20,7 @@ const tabPengeluaran = document.getElementById('tab-pengeluaran');
 const transactionAmount = document.getElementById('transaction-amount');
 const kategoriGrid = document.getElementById('kategori-grid');
 
-// DOM Mode Disiplin[cite: 2]
+// DOM Mode Disiplin
 const subDisiplinUtama = document.getElementById('sub-disiplin-utama');
 const subDisiplinRulesPicker = document.getElementById('sub-disiplin-rules-picker');
 const toggleModeDisiplin = document.getElementById('toggle-mode-disiplin');
@@ -43,7 +43,7 @@ const inputFileAvatar = document.getElementById('input-file-avatar');
 const imgUserAvatar = document.getElementById('img-user-avatar');
 const iconUserDefault = document.getElementById('icon-user-default');
 
-// State Aplikasi[cite: 2]
+// State Aplikasi
 let currentDate = new Date(); 
 let reportDate = new Date();  
 let currentBalance = 0;
@@ -77,7 +77,7 @@ const kategoriData = {
 };
 
 // ==========================================
-// 1. NAVIGATION ROUTING[cite: 2]
+// 1. NAVIGATION ROUTING
 // ==========================================
 function pindahMenuUtama(targetMenu) {
     Object.keys(containers).forEach(menu => {
@@ -118,7 +118,7 @@ document.getElementById('btn-next-date').addEventListener('click', () => { curre
 function updateTanggalLayar() { currentDateDisplay.innerText = formatTanggalString(currentDate); if(auth.currentUser) loadHistoriHariIni(auth.currentUser.uid); }
 
 // ==========================================
-// 2. REALTIME FIRESTORE SYNC & AUTO RESET[cite: 2]
+// 2. REALTIME FIRESTORE SYNC & AUTO RESET
 // ==========================================
 onAuthStateChanged(auth, async (user) => {
     if (user) {
@@ -159,10 +159,7 @@ async function cekResetAkhirBulanDanSync(uid) {
     }
     
     toggleModeDisiplin.checked = disiplinActive;
-    
-    // Evaluasi tombol dan komponen berdasarkan status disiplin[cite: 2]
     proteksiDanSembunyikanKomponenDisiplin();
-
     boxKonfigurasiDisiplin.classList.toggle('hidden', !disiplinActive);
     updateBalanceDOM();
     hitungPersenTabungan(); 
@@ -174,25 +171,15 @@ function updateBalanceDOM() {
     profileSavingDisplay.innerText = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(currentSavings);
 }
 
-// ==========================================
-// FIX BUG: FUNGSI SEMBUNYIKAN SELESAI KLIK
-// ==========================================
 function proteksiDanSembunyikanKomponenDisiplin() {
     const gridLevelContainer = document.getElementById('lvl-kustom').parentElement;
-
     if (disiplinActive && currentBalance > 0) {
-        // 1. Kunci sakelar toggle utama[cite: 2]
         toggleModeDisiplin.setAttribute('disabled', 'true');
-        
-        // 2. Sembunyikan tombol Simpan, Tambah Aturan, dan Grid Level sesuai instruksi
         btnSimpanDisiplinConfig.classList.add('hidden');
         btnTambahAturan.classList.add('hidden');
         gridLevelContainer.classList.add('hidden');
-        
-        // Kunci input nilai tabungan agar tidak bisa dimodifikasi manual lewat ketikan belakang
         inputNilaiTabungan.setAttribute('readonly', 'true');
     } else {
-        // Jika belum aktif, kembalikan tampilan konfigurasi seperti semula
         toggleModeDisiplin.removeAttribute('disabled');
         btnSimpanDisiplinConfig.classList.remove('hidden');
         btnTambahAturan.classList.remove('hidden');
@@ -202,7 +189,7 @@ function proteksiDanSembunyikanKomponenDisiplin() {
 }
 
 // ==========================================
-// 3. LOGIKA FORM MODE DISIPLIN[cite: 2]
+// 3. LOGIKA FORM MODE DISIPLIN
 // ==========================================
 toggleModeDisiplin.addEventListener('change', async (e) => {
     disiplinActive = e.target.checked;
@@ -221,8 +208,7 @@ Object.keys(lvlButtons).forEach(lvl => {
 });
 
 function hitungPersenTabungan() {
-    if (disiplinActive && btnSimpanDisiplinConfig.classList.contains('hidden')) return; // Jika sudah dikunci, stop hitung ulang agar data tidak ke-reset 0
-
+    if (disiplinActive && btnSimpanDisiplinConfig.classList.contains('hidden')) return; 
     let persen = 0;
     if (tipeMenabungLevel === 'mudah') persen = 10;
     else if (tipeMenabungLevel === 'sedang') persen = 20;
@@ -254,7 +240,7 @@ btnSimpanDisiplinConfig.addEventListener('click', async () => {
 });
 
 // ==========================================
-// SUB FORM ATURAN KATEGORI[cite: 2]
+// SUB FORM ATURAN KATEGORI
 // ==========================================
 btnTambahAturan.addEventListener('click', () => { subDisiplinUtama.classList.add('hidden'); subDisiplinRulesPicker.classList.remove('hidden'); renderKategoriRulesSelection(); });
 btnCancelRule.addEventListener('click', () => { subDisiplinRulesPicker.classList.add('hidden'); subDisiplinUtama.classList.remove('hidden'); ruleSelectedKategori = ''; });
@@ -287,17 +273,14 @@ function renderRulesListDOM() {
     aturanBatasKategori.forEach(rule => {
         const row = document.createElement('div');
         row.className = "bg-pink-50/60 border border-pink-100 rounded-xl p-3 flex justify-between items-center text-xs";
-        
-        // Hapus link tombol hapus bawaan jika mode disiplin sudah terkunci di cloud
         const htmlTombolHapus = disiplinActive ? '' : `<button class="block text-[9px] text-red-400 font-bold hover:underline mt-0.5" onclick="hapusRuleLokal('${rule.kategori}')">Hapus</button>`;
-
         row.innerHTML = `<div><p class="font-bold text-slate-800">${rule.kategori}</p><p class="text-[9px] text-slate-400">Batas Maksimal: Per ${rule.periode}</p></div><div class="text-right"><span class="font-black text-slate-700">Rp ${rule.limit.toLocaleString('id-ID')}</span>${htmlTombolHapus}</div>`;
         rulesListContainer.appendChild(row);
     });
 }
 
 window.hapusRuleLokal = async (katName) => {
-    if (disiplinActive) return; // Kunci akses fungsi hapus jika sudah aktif
+    if (disiplinActive) return; 
     aturanBatasKategori = aturanBatasKategori.filter(r => r.kategori !== katName);
     if(auth.currentUser) { try { await deleteDoc(doc(db, "users", auth.currentUser.uid, "rules", katName)); } catch(e){} }
     renderRulesListDOM();
@@ -309,7 +292,7 @@ async function loadRulesFromCloud(uid) {
 }
 
 // ==========================================
-// 4. PEMASUKAN / PENGELUARAN UTAMA[cite: 2]
+// 4. PEMASUKAN / PENGELUARAN UTAMA
 // ==========================================
 function setTabFormType(type) {
     selectedType = type;
@@ -341,7 +324,7 @@ function renderKategori() {
 }
 
 // ==========================================
-// 5. RENDERING HISTORI DENGAN FITUR SWIPE[cite: 2]
+// 5. RENDERING HISTORI DENGAN FITUR SWIPE
 // ==========================================
 async function loadHistoriHariIni(uid) {
     historiList.innerHTML = '';
@@ -414,9 +397,9 @@ async function loadHistoriHariIni(uid) {
     } catch(e){}
 }
 
-// ==========================================
-// 6. ACTION SUBMIT TRANSACTION[cite: 2]
-// ==========================================
+// =====================================================================
+// 6. ACTION SUBMIT TRANSACTION (FIXED BUG INTERCEPTOR AKUMULASI)
+// =====================================================================
 btnSubmitTransaksi.addEventListener('click', async () => {
     const amount = parseInt(transactionAmount.value);
     const currentUser = auth.currentUser;
@@ -442,11 +425,35 @@ btnSubmitTransaksi.addEventListener('click', async () => {
             if (selectedType === 'expense') {
                 if (amount > currentBalance) { alert("Saldo tidak mencukupi."); return; }
                 
+                // FIX BUG UTAMA: Validasi Hitung Akumulasi Riwayat Pengeluaran Realtime dari Server
                 if (disiplinActive) {
                     const rule = aturanBatasKategori.find(r => r.kategori === selectedKategori);
-                    if (rule && amount > rule.limit) {
-                        const lanjut = confirm(`[PERINGATAN DISIPLIN TANGGALTUA]\n\nPengeluaran Kategori "${selectedKategori}" melampaui batas maksimal aturan Anda (Batas: Rp ${rule.limit.toLocaleString('id-ID')}).\n\nTetap ingin melanjutkan transaksi ini?`);
-                        if (!lanjut) return;
+                    if (rule) {
+                        let totalPengeluaranTercatat = 0;
+                        const tglFormatLokal = formatTanggalDatabase(currentDate); // Format: YYYY-MM-DD
+                        const bulanFormatLokal = tglFormatLokal.substring(0, 7);   // Format: YYYY-MM
+                        
+                        // Tarik seluruh list transaksi dari server cloud untuk dihitung akumulasinya
+                        const qCek = query(collection(db, "transactions"), where("uid", "==", currentUser.uid), where("kategori", "==", selectedKategori));
+                        const snapCek = await getDocs(qCek);
+                        
+                        snapCek.forEach(d => {
+                            const tData = d.data();
+                            if (rule.periode === 'hari' && tData.dateStr === tglFormatLokal) {
+                                totalPengeluaranTercatat += tData.amount;
+                            } else if (rule.periode === 'bulan' && tData.dateStr && tData.dateStr.startsWith(bulanFormatLokal)) {
+                                totalPengeluaranTercatat += tData.amount;
+                            }
+                        });
+
+                        // Cek gabungan pengeluaran lalu + input baru apakah mendobrak batas
+                        if ((totalPengeluaranTercatat + amount) > rule.limit) {
+                            const sisaKuotaBatas = rule.limit - totalPengeluaranTercatat;
+                            const textPeriode = rule.periode === 'hari' ? 'Hari Ini' : 'Bulan Ini';
+                            
+                            const lanjut = confirm(`[PERINGATAN DISIPLIN TANGGALTUA]\n\nAkumulasi pengeluaran Anda untuk Kategori "${selectedKategori}" pada ${textPeriode} akan melebihi batasan maksimal!\n\n• Pengeluaran Lalu: Rp ${totalPengeluaranTercatat.toLocaleString('id-ID')}\n• Input Baru: Rp ${amount.toLocaleString('id-ID')}\n• Total Gabungan: Rp ${(totalPengeluaranTercatat + amount).toLocaleString('id-ID')}\n• Batas Maksimal: Rp ${rule.limit.toLocaleString('id-ID')}\n\nTetap ingin melanjutkan transaksi ini?`);
+                            if (!lanjut) return;
+                        }
                     }
                 }
                 currentBalance -= amount;
@@ -470,7 +477,7 @@ btnSubmitTransaksi.addEventListener('click', async () => {
 });
 
 // ==========================================
-// 7. PROFILE & AVATAR EDIT[cite: 2]
+// 7. PROFILE & AVATAR EDIT
 // ==========================================
 inputFileAvatar.addEventListener('change', (e) => {
     const file = e.target.files[0];
@@ -490,7 +497,7 @@ document.getElementById('btn-edit-name').addEventListener('click', async () => {
 });
 
 // ==========================================
-// 8. MENU REPORT LAPORAN (CHART.JS LOGIC)[cite: 2]
+// 8. MENU REPORT LAPORAN (CHART.JS LOGIC)
 // ==========================================
 const repBtnPrevMonth = document.getElementById('rep-btn-prev-month');
 const repBtnNextMonth = document.getElementById('rep-btn-next-month');
@@ -572,7 +579,6 @@ function renderDonutChart(dataObj, totalUang) {
     }); 
 }
 
-// (Fungsi renderLineChart tetap dipertahankan penuh tanpa potongan)[cite: 2]
 function renderLineChart(harianObj) { 
     repDataList.innerHTML = ''; const arrayTanggalKeys = Object.keys(harianObj); const arrayNilaiValues = Object.values(harianObj); const labelHariSaja = arrayTanggalKeys.map(k => parseInt(k.split('-')[2])); const ctx = document.getElementById('financialChart').getContext('2d'); 
     activeChartInstance = new Chart(ctx, { type: 'line', data: { labels: labelHariSaja, datasets: [{ data: arrayNilaiValues, borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.1)', borderWidth: 2, tension: 0.3, pointRadius: 1, fill: true }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } }, y: { grid: { color: '#f3f4f6' } } } } }); 
@@ -589,5 +595,5 @@ function renderLineChart(harianObj) {
     if (!adaTransaksi) { repDataList.innerHTML += '<p class="text-center text-xs text-slate-400 mt-6">Tidak ada catatan pengeluaran bulan ini.</p>'; } 
 }
 
-// Log-out[cite: 2]
+// Log-out
 document.getElementById('btn-logout').addEventListener('click', () => { signOut(auth).catch(err => alert(err.message)); });
