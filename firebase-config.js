@@ -5,6 +5,7 @@ import { getFirestore } from "https://www.gstatic.com/firebasejs/10.10.0/firebas
 
 // GANTI DENGAN KONFIGURASI FIREBASE PROJECT ANDA SENDIRI
 // Menyembunyikan Key menggunakan Environment Variables bawaan hosting/Vite
+//testtt
 const firebaseConfig = {
     apiKey: import.meta.env.VITE_FIREBASE_API_KEY || window._env_?.FIREBASE_API_KEY,
     authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || window._env_?.FIREBASE_AUTH_DOMAIN,
