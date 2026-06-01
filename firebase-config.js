@@ -1,18 +1,17 @@
 // firebase-config.js
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
 import { getAuth, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
-
 import { getFirestore } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
 
 // GANTI DENGAN KONFIGURASI FIREBASE PROJECT ANDA SENDIRI
+// Menyembunyikan Key menggunakan Environment Variables bawaan hosting/Vite
 const firebaseConfig = {
-  apiKey: "AIzaSyBeooj-bdmmH46dbwAQKLaHUiS5-brURpM",
-  authDomain: "tanggaltua-45171.firebaseapp.com",
-  projectId: "tanggaltua-45171",
-  storageBucket: "tanggaltua-45171.firebasestorage.app",
-  messagingSenderId: "119166926168",
-  appId: "1:119166926168:web:1364a0b6460482b964792d",
-  measurementId: "G-C1GLDXWDYK"
+    apiKey: import.meta.env.VITE_FIREBASE_API_KEY || window._env_?.FIREBASE_API_KEY,
+    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || window._env_?.FIREBASE_AUTH_DOMAIN,
+    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || window._env_?.FIREBASE_PROJECT_ID,
+    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || window._env_?.FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || window._env_?.FIREBASE_MESSAGING_SENDER_ID,
+    appId: import.meta.env.VITE_FIREBASE_APP_ID || window._env_?.FIREBASE_APP_ID
 };
 
 // Inisialisasi Firebase
@@ -21,5 +20,4 @@ const app = initializeApp(firebaseConfig);
 // Ekspor instance Auth dan Google Provider untuk dipakai di app.js
 export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
-
 export const db = getFirestore(app);
